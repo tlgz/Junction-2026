@@ -3,13 +3,20 @@
   "name": "PropagandaDestroyer3000",
   "version": "1.0",
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "src/frontend/popup/popup.html"
   },
   "content_scripts": [
     {
       "matches": ["https://x.com/*", "https://twitter.com/*"],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "js": [
+        "src/shared/namespace.js",
+        "src/backend/platforms/x.js",
+        "src/backend/detection/detector.js",
+        "src/frontend/overlay/overlay.js",
+        "src/backend/content/observer.js",
+        "src/backend/content/main.js"
+      ],
+      "css": ["src/frontend/overlay/overlay.css"],
       "run_at": "document_idle"
     }
   ]
