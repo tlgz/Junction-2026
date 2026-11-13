@@ -1,0 +1,16 @@
+{
+  "name": "propaganda-destroyer-3000",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome extension that detects and hides propaganda posts on social media feeds.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.0"
+  }
+}

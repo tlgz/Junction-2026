@@ -1,7 +1,17 @@
-article[data-testid="tweet"].pd3k-flagged {
+/* In-page overlay for flagged posts. All classes are prefixed pd3k- to avoid
+   clashing with host page styles. */
+
+.pd3k-flagged {
+  --pd3k-red: #e00000;
   position: relative !important;
-  outline: 3px solid #e00000 !important;
-  outline-offset: -3px;
+  outline: 2px solid var(--pd3k-red) !important;
+  outline-offset: 2px;
+  border-radius: 12px;
+  min-height: 96px;
+}
+
+.pd3k-flagged.pd3k-expanded {
+  min-height: 260px;
 }
 
 .pd3k-overlay {
@@ -9,33 +19,108 @@ article[data-testid="tweet"].pd3k-flagged {
   inset: 0;
   z-index: 10;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: inherit;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   background: rgba(255, 255, 255, 0.15);
   cursor: default;
+  font-family: system-ui, sans-serif;
+}
+
+.pd3k-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-height: 100%;
+}
+
+.pd3k-labels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
 }
 
 .pd3k-label {
-  color: #e00000;
-  font: 800 28px/1 system-ui, sans-serif;
-  letter-spacing: 2px;
+  padding: 3px 10px;
+  border: 2px solid var(--pd3k-red);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--pd3k-red);
+  font: 800 15px/1.2 system-ui, sans-serif;
+  letter-spacing: 1px;
 }
 
-.pd3k-show {
-  padding: 8px 18px;
-  border: 2px solid #e00000;
+.pd3k-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pd3k-btn {
+  padding: 6px 14px;
+  border: 2px solid var(--pd3k-red);
   border-radius: 999px;
   background: #fff;
-  color: #e00000;
-  font: 700 14px/1 system-ui, sans-serif;
+  color: var(--pd3k-red);
+  font: 700 13px/1 system-ui, sans-serif;
   cursor: pointer;
 }
 
-.pd3k-show:hover {
-  background: #e00000;
+.pd3k-btn:hover,
+.pd3k-btn-primary {
+  background: var(--pd3k-red);
   color: #fff;
+}
+
+.pd3k-btn-primary:hover {
+  background: #b00000;
+}
+
+.pd3k-details {
+  width: min(320px, 100%);
+  margin: 0;
+  padding: 10px 12px;
+  list-style: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111;
+  font-size: 13px;
+  text-align: left;
+}
+
+.pd3k-prediction + .pd3k-prediction {
+  margin-top: 10px;
+}
+
+.pd3k-prediction-head {
+  display: flex;
+  gap: 6px;
+  font-weight: 800;
+}
+
+.pd3k-score,
+.pd3k-category {
+  color: var(--pd3k-red);
+}
+
+.pd3k-bar {
+  height: 4px;
+  margin: 4px 0;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--pd3k-red) var(--pd3k-value),
+    #ddd var(--pd3k-value)
+  );
+}
+
+.pd3k-reasons {
+  margin: 0;
+  padding-left: 18px;
+  color: #444;
 }

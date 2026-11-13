@@ -1,16 +1,28 @@
 # PropagandaDestroyer3000
 
-Chrome extension (Manifest V3) that hides propaganda posts on X/Twitter behind a blur with a "show anyways" button.
+Chrome extension (Manifest V3) that hides propaganda and phishing posts on X/Twitter behind a blur, with labels, a details view of predictions, and a "show anyways" button.
 
-## Install
+## Setup
 
-1. Open `chrome://extensions` and enable **Developer mode**.
-2. Click **Load unpacked** and select this folder.
+Requires Node.js 20+.
+
+```sh
+npm install
+npm run build      # or: npm run watch
+```
+
+Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacked** and select the `dist/` folder.
+
+## Scripts
+
+- `npm run build`: production build into `dist/`
+- `npm run watch`: rebuild on change
+- `npm run typecheck`: type-check without emitting
 
 ## Structure
 
 - `src/frontend/`: UI (popup, in-page overlay)
 - `src/backend/`: functionality (feed observer, detection, platform adapters)
-- `src/shared/`: shared namespace and constants
+- `src/shared/`: shared types and constants
 
-See [.agents/.AGENTS.md](.agents/.AGENTS.md) for architecture rules.
+See [.agents/AGENTS.md](.agents/AGENTS.md) for architecture rules.
