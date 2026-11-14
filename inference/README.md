@@ -70,7 +70,9 @@ Every push to `main` that touches `inference/` builds the image and pushes it to
 **Actions → Build inference image → Run workflow** (you can pin a model revision there). The run
 summary shows the tag to deploy.
 
-The model repo is public, so no token is needed. If it ever goes private, add a repo secret `HF_TOKEN`.
+The model repo is **gated**, so the build needs a Hugging Face read token. Add it as a repo secret
+named `HF_TOKEN` (**Settings → Secrets and variables → Actions → New repository secret**). It is
+passed to the build as a BuildKit secret and does not end up in the image.
 
 ### By hand
 
@@ -82,7 +84,7 @@ docker build -t dnoise-inference inference/
 # Pin a model commit:
 docker build --build-arg MODEL_REVISION=<commit-sha> -t dnoise-inference inference/
 
-# Private model repo (token is passed as a secret and not stored in the image):
+# The model repo is gated, so pass an HF read token (as a secret, not stored in the image):
 echo -n "$HF_TOKEN" > /tmp/hf_token
 docker build --secret id=hf_token,src=/tmp/hf_token -t dnoise-inference inference/
 ```
