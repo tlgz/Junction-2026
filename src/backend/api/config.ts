@@ -13,7 +13,7 @@ export interface ApiConfig {
 
 const DEFAULT_API_URL = "https://dnoise.tech/api/classify";
 
-const DEFAULTS: ApiConfig = { apiUrl: DEFAULT_API_URL, apiKey: "", timeoutMs: 10_000 };
+const DEFAULTS: ApiConfig = { apiUrl: DEFAULT_API_URL, apiKey: "", timeoutMs: 15_000 };
 
 export async function loadConfig(): Promise<ApiConfig> {
   const stored = await chrome.storage.local.get(Object.keys(DEFAULTS));

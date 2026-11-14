@@ -5,6 +5,10 @@ export type Category = (typeof CATEGORIES)[number];
 
 /** Everything we extract from a post. `text` is what gets classified. */
 export interface PostData {
+  /** "x" for a platform adapter post, "web" for a generic block on any site. */
+  source: "x" | "web";
+  /** Hostname the content was found on, e.g. "news.example.com". */
+  site: string;
   /** Platform post id, used for caching and logging. Null if not found. */
   id: string | null;
   /** Main text of the post, plain text. */
@@ -56,9 +60,17 @@ export interface OverlayTarget {
 
 export interface PlatformAdapter {
   name: string;
+  /** Hostnames this adapter owns. Empty for the generic fallback. */
   hosts: string[];
-  postSelector: string;
+  /**
+   * Returns candidate posts. `roots` are the subtrees that changed since the
+   * last call (the whole body on the first call); adapters may ignore them.
+   */
+  findPosts(roots: Element[]): HTMLElement[];
   extractPost(post: HTMLElement): PostData;
-  /** Identifies the layout elements of a post for filter and card placement. */
-  getOverlayTarget(post: HTMLElement): OverlayTarget;
+  /**
+   * Layout of a post for the in-place blur + card. When absent, a flagged
+   * element is collapsed ad-blocker style with a card in its place.
+   */
+  getOverlayTarget?(post: HTMLElement): OverlayTarget;
 }

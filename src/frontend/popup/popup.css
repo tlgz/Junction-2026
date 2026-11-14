@@ -1,50 +1,218 @@
-body {
-  width: 200px;
-  margin: 0;
-  padding: 16px;
-  background: #16181c;
-  color: #e7e9ea;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  text-align: center;
+:root {
+  --bg: #16181c;
+  --surface: #202327;
+  --border: #2f3336;
+  --text: #e7e9ea;
+  --muted: #71767b;
+  --on: #00ba7c;
+  --on-text: #ffffff;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --surface: #f7f9f9;
+    --border: #e1e8ed;
+    --text: #0f1419;
+    --muted: #536471;
+    --on: #00a36c;
+    color-scheme: light;
+  }
+}
+
+* {
   box-sizing: border-box;
 }
+
+body {
+  width: 280px;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Header */
 
 .header {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  margin-bottom: 4px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
 }
 
-.header-logo {
-  width: 20px;
-  height: 20px;
+.logo {
   display: block;
   object-fit: contain;
 }
 
-h2 {
-  margin: 0;
-  font-size: 16px;
+.logo-light {
+  display: none;
+}
+
+@media (prefers-color-scheme: light) {
+  .logo-dark {
+    display: none;
+  }
+  .logo-light {
+    display: block;
+  }
+}
+
+.brand {
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-.tagline {
-  margin: 0 0 12px 0;
-  font-size: 11.5px;
-  color: #71767b;
-  line-height: 1.4;
+/* Power toggle */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 16px;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 3px 12px;
-  border-radius: 9999px;
-  font-size: 11px;
+.power {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.power:hover {
+  border-color: var(--muted);
+}
+
+.power[aria-pressed="true"] {
+  background: var(--on);
+  border-color: var(--on);
+  color: var(--on-text);
+}
+
+.power[aria-pressed="true"]:hover {
+  filter: brightness(1.06);
+}
+
+.power:focus-visible,
+.switch:focus-visible,
+.reload:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+
+.state {
+  margin: 10px 0 2px;
+  font-size: 15px;
   font-weight: 700;
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  color: #4ade80;
+}
+
+.site {
+  margin: 0;
+  color: var(--muted);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.count {
+  margin: 10px 0 0;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Experimental option */
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.option-title {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.option-desc {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.switch {
+  appearance: none;
+  flex-shrink: 0;
+  position: relative;
+  width: 36px;
+  height: 20px;
+  margin: 0;
+  border-radius: 9999px;
+  background: var(--border);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.15s ease;
+}
+
+.switch:checked {
+  background: var(--on);
+}
+
+.switch:checked::after {
+  transform: translateX(16px);
+}
+
+.switch:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Reload hint */
+
+.reload {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 14px;
+  padding: 7px 0;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reload:hover {
+  background: var(--surface);
+}
+
+.reload[hidden] {
+  display: none;
 }

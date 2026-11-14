@@ -1,10 +1,14 @@
-// Watches the feed for newly rendered posts and hands each one to a callback
-// exactly once. Batches mutations into one scan per animation frame.
+// Watches the page for new or changed content and hands each candidate post to
+// a callback exactly once. Mutations are batched into one scan per animation
+// frame, and only the changed subtrees are passed to the finder.
 
 import { PROCESSED_ATTR } from "../../shared/constants";
 
-export function observeFeed(
-  selector: string,
+/** Past this many changed roots in one frame, rescanning the body is cheaper. */
+const MAX_PENDING_ROOTS = 300;
+
+export function observePage(
+  find: (roots: Element[]) => HTMLElement[],
   onPost: (post: HTMLElement) => void,
 ): MutationObserver {
   const process = (el: HTMLElement) => {
@@ -13,20 +17,32 @@ export function observeFeed(
     onPost(el);
   };
 
-  const scan = () => document.querySelectorAll<HTMLElement>(selector).forEach(process);
-
+  let pending = new Set<Element>([document.body]);
   let scheduled = false;
-  const scheduleScan = () => {
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(() => {
-      scheduled = false;
-      scan();
-    });
+
+  const flush = () => {
+    scheduled = false;
+    const roots = pending.has(document.body) ? [document.body] : [...pending];
+    pending = new Set();
+    find(roots).forEach(process);
   };
 
-  scan();
-  const observer = new MutationObserver(scheduleScan);
-  observer.observe(document.body, { childList: true, subtree: true });
+  const queue = (node: Node) => {
+    const el = node instanceof Element ? node : node.parentElement;
+    if (!el || el.closest(".pd3k-card, .pd3k-revealed-wrap")) return; // our own UI
+    pending.add(pending.size >= MAX_PENDING_ROOTS ? document.body : el);
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(flush);
+  };
+
+  flush();
+  const observer = new MutationObserver((records) => {
+    for (const record of records) {
+      if (record.type === "characterData") queue(record.target);
+      else record.addedNodes.forEach(queue);
+    }
+  });
+  observer.observe(document.body, { childList: true, characterData: true, subtree: true });
   return observer;
 }

@@ -5,13 +5,8 @@ import type { OverlayTarget, Verdict } from "../../shared/types";
 import { el, swallow } from "../dom";
 import { createRevealedBanner } from "./banner";
 import { createInterceptionCard } from "./card";
+import { getLikelihood } from "./likelihood";
 import "./overlay.css";
-
-function getLikelihood(verdict: Verdict): number {
-  const propaganda = verdict.predictions.find((p) => p.category === "PROPAGANDA");
-  const primary = propaganda ?? verdict.predictions[0];
-  return Math.max(0, Math.min(100, Math.round((primary?.confidence ?? 0.84) * 100)));
-}
 
 function pauseMedia(root: HTMLElement): void {
   root.querySelectorAll<HTMLMediaElement>("video, audio").forEach((m) => {

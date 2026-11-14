@@ -338,3 +338,36 @@
   border-radius: 0;
   background: #101215;
 }
+
+/* ── Any-site shield (generic adapter) ────────────────────────────────────── */
+
+/* The flagged element is collapsed in place, like an ad blocker hides an ad. */
+.pd3k-collapsed {
+  display: none !important;
+}
+
+/* Holder that takes the collapsed element's place. Resets host list/text styles. */
+.pd3k-slot {
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  text-indent: 0;
+  max-width: 100%;
+}
+
+.pd3k-slot .pd3k-card,
+.pd3k-slot .pd3k-revealed-wrap {
+  line-height: normal;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.pd3k-slot .pd3k-card button,
+.pd3k-slot .pd3k-revealed-wrap button {
+  margin: 0;
+  min-height: 0;
+  text-transform: none;
+  box-shadow: none;
+}

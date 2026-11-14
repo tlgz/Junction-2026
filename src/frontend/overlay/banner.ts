@@ -3,6 +3,7 @@
 import type { Verdict } from "../../shared/types";
 import { el, swallow } from "../dom";
 import { createInfoSection } from "./details";
+import { primaryLabel } from "./likelihood";
 
 export interface RevealedBannerOptions {
   likelihood: number;
@@ -20,7 +21,7 @@ export function createRevealedBanner({
   const warningText = el(
     "p",
     "pd3k-revealed-text",
-    `${likelihood}% Propaganda Likelihood`,
+    `${likelihood}% ${primaryLabel(verdict)} Likelihood`,
   );
   const info = createInfoSection(verdict);
   info.btn.classList.add("pd3k-info-btn-compact");

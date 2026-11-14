@@ -1,6 +1,6 @@
 # AGENTS.md - Dnoise
 
-Chrome Extension (Manifest V3) that detects and hides propaganda/disinformation posts on social media feeds (starting with X/Twitter).
+Chrome Extension (Manifest V3) that detects and hides propaganda/disinformation posts on any website: a dedicated adapter for X/Twitter, plus a generic adapter that finds text blocks (comments, list items, posts, paragraphs) on every other site and collapses flagged ones in place, ad-blocker style.
 
 ## Layout
 
@@ -22,7 +22,9 @@ The repository is split into two independent parts:
 - The wire format of the AI service lives in one file (the API client). Treat API responses as untrusted and validate them.
 - Verdict logic is pure: predictions in, verdict out, no DOM access.
 - A failed or missing analysis must never hide a post.
-- Site-specific selectors and post parsing live only in platform adapters, one per site.
+- Site-specific selectors and post parsing live only in platform adapters, one per site. `platforms/generic.ts` is the fallback for every other site.
+- Filtering runs only on the social platforms listed in `src/shared/settings.ts` by default; the popup's Experimental mode extends it to every site, and its power button turns everything off. The content script checks `isActiveOn()` before scanning and before hiding.
+- The generic shield only toggles a class on the flagged element and inserts a sibling card; never move or re-parent host elements on arbitrary sites.
 - Keep files small and single-purpose (< 150 lines).
 
 ## Build & Modules

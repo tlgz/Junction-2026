@@ -1,35 +1,85 @@
-// Content script entry point. Wires platform adapter -> analysis -> overlay UI.
+// Content script entry point, injected into every http(s) page. Only runs on
+// supported social platforms, or everywhere in Experimental mode (see settings).
+// Wires platform adapter -> analysis (lazily, as posts near the viewport) -> UI.
 
 import { mountOverlay } from "../../frontend/overlay/overlay";
+import { mountShield } from "../../frontend/overlay/shield";
+import type { FlaggedMessage } from "../../shared/messages";
+import { isActiveOn, loadSettings, type Settings } from "../../shared/settings";
+import type { PlatformAdapter } from "../../shared/types";
 import { getPlatform } from "../platforms";
 import { analyze } from "./analyze";
-import { observeFeed } from "./observer";
+import { observePage } from "./observer";
 
-const platform = getPlatform();
+/** Hard cap on API calls per page load, so endless pages can't run up costs. */
+const MAX_ANALYSES_PER_PAGE = 250;
+/** Start analyzing a bit before content scrolls into view. */
+const PRELOAD_MARGIN = "800px 0px";
 
-if (platform) {
-  console.log(`[pd3k] Initialized on ${window.location.hostname}. Observing feed...`);
-  observeFeed(platform.postSelector, async (element) => {
-    const post = platform.extractPost(element);
-    if (!post.text) return; // nothing to classify (e.g. image-only post)
+let settings: Settings | null = null;
+let started = false;
+const active = () => settings !== null && isActiveOn(location.hostname, settings);
 
-    const verdict = await analyze(post);
-    if (!verdict) {
-      console.debug(`[pd3k] No verdict returned for ${post.handle || "post"}`);
-      return;
-    }
+async function handle(platform: PlatformAdapter, element: HTMLElement): Promise<void> {
+  const post = platform.extractPost(element);
+  if (!post.text) return; // nothing to classify (e.g. image-only post)
 
-    if (verdict.hide) {
-      const top = verdict.predictions[0];
-      const pct = Math.round((top?.confidence ?? 0) * 100);
-      console.log(
-        `%c[pd3k] 🚨 FLAGGED ${post.handle || "post"} (${top?.category} ${pct}%)`,
-        "color: #ff4d4d; font-weight: bold;",
-        verdict.labels,
-      );
-      mountOverlay(platform.getOverlayTarget(element), verdict);
-    } else {
-      console.debug(`[pd3k] ✅ Clean post by ${post.handle || "author"}`);
-    }
+  const verdict = await analyze(post);
+  // Settings may have changed while the request was in flight.
+  if (!verdict?.hide || !element.isConnected || !active()) return;
+
+  const top = verdict.predictions[0];
+  console.log(
+    `%c[pd3k] FLAGGED on ${post.site} (${top?.category} ${Math.round((top?.confidence ?? 0) * 100)}%)`,
+    "color: #ff4d4d; font-weight: bold;",
+    verdict.labels,
+  );
+  if (platform.getOverlayTarget) mountOverlay(platform.getOverlayTarget(element), verdict);
+  else mountShield(element, verdict);
+  const flagged: FlaggedMessage = { type: "pd3k:flagged" };
+  void chrome.runtime.sendMessage(flagged).catch(() => {});
+}
+
+function start(platform: PlatformAdapter): void {
+  started = true;
+  console.log(`[pd3k] Initialized on ${location.hostname} (${platform.name} adapter).`);
+  let analyses = 0;
+
+  const visibility = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting || !active()) continue; // paused: skipped until it scrolls into view again
+        visibility.unobserve(entry.target);
+        if (analyses >= MAX_ANALYSES_PER_PAGE) continue;
+        analyses++;
+        void handle(platform, entry.target as HTMLElement);
+      }
+    },
+    { rootMargin: PRELOAD_MARGIN },
+  );
+
+  observePage(
+    (roots) => platform.findPosts(roots),
+    (el) => visibility.observe(el),
+  );
+}
+
+function sync(): void {
+  if (active() && !started) start(getPlatform());
+}
+
+if (document.body && document.contentType === "text/html") {
+  void loadSettings().then((loaded) => {
+    settings = loaded;
+    sync();
+  });
+  // Popup toggles apply to new content right away; already-hidden items stay
+  // until reload (the popup offers one).
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "local" || !("enabled" in changes || "experimental" in changes)) return;
+    void loadSettings().then((loaded) => {
+      settings = loaded;
+      sync();
+    });
   });
 }

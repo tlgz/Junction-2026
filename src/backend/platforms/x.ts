@@ -46,7 +46,11 @@ function getColumnChild(descendant: Element | null, column: HTMLElement): HTMLEl
 export const xAdapter: PlatformAdapter = {
   name: "x",
   hosts: ["x.com", "twitter.com"],
-  postSelector: SEL.post,
+
+  // X recycles articles while scrolling, so rescan the document on every change.
+  findPosts() {
+    return [...document.querySelectorAll<HTMLElement>(SEL.post)];
+  },
 
   extractPost(post) {
     const ownAuthor = post.querySelector<HTMLElement>(SEL.author);
@@ -63,6 +67,8 @@ export const xAdapter: PlatformAdapter = {
     const permalink = post.querySelector<HTMLAnchorElement>(SEL.permalink)?.href ?? null;
 
     return {
+      source: "x",
+      site: location.hostname,
       id: permalink?.match(/\/status\/(\d+)/)?.[1] ?? null,
       text: textEl?.innerText?.trim() ?? "",
       author: authorText.split("\n")[0]?.trim() ?? "",

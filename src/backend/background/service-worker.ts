@@ -4,6 +4,7 @@
 
 import {
   isAnalyzeMessage,
+  isFlaggedMessage,
   type AnalyzeResponse,
 } from "../../shared/messages";
 import type { PostData, Verdict } from "../../shared/types";
@@ -14,16 +15,34 @@ import { isTrivial } from "../detection/prefilter";
 import { buildVerdict } from "../detection/verdict";
 
 const CACHE_LIMIT = 500;
+/** Generic pages can surface dozens of blocks at once; don't flood the API. */
+const MAX_CONCURRENT = 4;
 /** In-flight and finished analyses by post content, so identical posts cost one call. */
 const cache = new Map<string, Promise<Verdict>>();
+
+let active = 0;
+const waiting: (() => void)[] = [];
+
+async function limited<T>(task: () => Promise<T>): Promise<T> {
+  if (active >= MAX_CONCURRENT) await new Promise<void>((resolve) => waiting.push(resolve));
+  active++;
+  try {
+    return await task();
+  } finally {
+    active--;
+    waiting.shift()?.();
+  }
+}
 
 async function analyze(post: PostData): Promise<Verdict> {
   if (isTrivial(post)) return buildVerdict([]);
   const config = await loadConfig();
-  console.log(`[pd3k:worker] Analyzing ${post.handle || "post"} via ${config.apiUrl || "mock"}`);
+  console.log(`[pd3k:worker] Analyzing ${post.handle || post.site} via ${config.apiUrl || "mock"}`);
   // Errors propagate: they are not cached, and the content script treats a
   // failed analysis as "don't hide".
-  const predictions = config.apiUrl ? await classify(post, config) : await mockPredict(post);
+  const predictions = config.apiUrl
+    ? await limited(() => classify(post, config))
+    : await mockPredict(post);
   return buildVerdict(predictions);
 }
 
@@ -44,7 +63,26 @@ function analyzeCached(post: PostData): Promise<Verdict> {
   return pending;
 }
 
-chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
+// Toolbar badge: number of hidden items on the current page, like an ad blocker.
+const hiddenPerTab = new Map<number, number>();
+void chrome.action.setBadgeBackgroundColor({ color: "#536471" });
+
+chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.status === "loading") hiddenPerTab.delete(tabId);
+});
+chrome.tabs.onRemoved.addListener((tabId) => hiddenPerTab.delete(tabId));
+
+function countHidden(tabId: number): void {
+  const count = (hiddenPerTab.get(tabId) ?? 0) + 1;
+  hiddenPerTab.set(tabId, count);
+  void chrome.action.setBadgeText({ tabId, text: String(count) });
+}
+
+chrome.runtime.onMessage.addListener((message: unknown, sender, sendResponse) => {
+  if (isFlaggedMessage(message)) {
+    if (sender.tab?.id !== undefined) countHidden(sender.tab.id);
+    return false;
+  }
   if (!isAnalyzeMessage(message)) return false;
 
   analyzeCached(message.post).then(

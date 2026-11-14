@@ -4,23 +4,24 @@ import type { Verdict } from "../../shared/types";
 import { el, swallow } from "../dom";
 import { createLogoSvg } from "../logo";
 import { createInfoSection } from "./details";
-
-const SUMMARY_TEXT =
-  "This post shows strong indicators of coordinated propaganda or manipulative framing.";
+import { primaryLabel, summaryText } from "./likelihood";
 
 export interface CardOptions {
   likelihood: number;
   verdict: Verdict;
+  /** Adds a "Show anyway" button; used where there is no blurred preview to click. */
+  onReveal?: () => void;
 }
 
 export function createInterceptionCard({
   likelihood,
   verdict,
+  onReveal,
 }: CardOptions): HTMLElement {
   const pill = el(
     "span",
     "pd3k-likelihood-pill",
-    `${likelihood}% Propaganda Likelihood`,
+    `${likelihood}% ${primaryLabel(verdict)} Likelihood`,
   );
   const brand = el(
     "span",
@@ -29,7 +30,7 @@ export function createInterceptionCard({
     "DNOISE INTERCEPTION",
   );
   const metaRow = el("div", "pd3k-meta-row", pill, brand);
-  const summary = el("p", "pd3k-summary", SUMMARY_TEXT);
+  const summary = el("p", "pd3k-summary", summaryText(verdict));
   const info = createInfoSection(verdict);
 
   info.btn.addEventListener("click", (e) => {
@@ -37,14 +38,18 @@ export function createInterceptionCard({
     info.toggle();
   });
 
-  const card = el(
-    "div",
-    "pd3k-card",
-    metaRow,
-    summary,
-    info.details,
-    el("div", "pd3k-actions", info.btn),
-  );
+  const actions = el("div", "pd3k-actions", info.btn);
+  if (onReveal) {
+    const showBtn = el("button", "pd3k-info-btn pd3k-show-btn", "Show anyway");
+    showBtn.type = "button";
+    showBtn.addEventListener("click", (e) => {
+      swallow(e);
+      onReveal();
+    });
+    actions.append(showBtn);
+  }
+
+  const card = el("div", "pd3k-card", metaRow, summary, info.details, actions);
   card.addEventListener("click", swallow);
 
   return card;

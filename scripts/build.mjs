@@ -24,6 +24,7 @@ const options = {
   entryPoints: {
     content: "src/backend/content/main.ts",
     background: "src/backend/background/service-worker.ts",
+    "popup/popup": "src/frontend/popup/popup.ts",
   },
   outdir,
   bundle: true,

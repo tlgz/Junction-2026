@@ -9,6 +9,8 @@ import type { ApiConfig } from "./config";
 interface ApiRequest {
   text: string;
   metadata: {
+    source: "x" | "web";
+    site: string;
     author: string;
     handle: string;
     url: string | null;
@@ -26,8 +28,8 @@ interface ApiResponse {
 }
 
 export function toRequest(post: PostData): ApiRequest {
-  const { text, author, handle, url, lang, links, mediaAlt, quotedText, card } = post;
-  return { text, metadata: { author, handle, url, lang, links, mediaAlt, quotedText, card } };
+  const { text, source, site, author, handle, url, lang, links, mediaAlt, quotedText, card } = post;
+  return { text, metadata: { source, site, author, handle, url, lang, links, mediaAlt, quotedText, card } };
 }
 
 const isCategory = (value: string): value is Category =>

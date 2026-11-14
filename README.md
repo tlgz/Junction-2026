@@ -7,7 +7,7 @@
 
 # Dnoise
 
-Chrome extension (Manifest V3) that hides propaganda and phishing posts on X/Twitter behind a clean filter, with labels, a details view of predictions, and a "show anyways" button.
+Chrome extension (Manifest V3) that hides propaganda, scam and phishing content on any website (X/Twitter posts, comments, forum replies, article blocks) element by element, like an ad blocker, with labels, a details view of predictions, and a "show anyways" button.
 
 ## Setup
 
