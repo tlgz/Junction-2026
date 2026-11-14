@@ -19,7 +19,7 @@ if (fs.existsSync(envPath)) {
   for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
     const m = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
     if (m && !process.env[m[1]]) {
-      process.env[m[1]] = m[2].trim().replace(/^['"]|['"]$/g, '');
+      process.env[m[1]] = (m[2] ?? '').trim().replace(/^['"]|['"]$/g, '');
     }
   }
 }
@@ -161,7 +161,9 @@ app.get('/', (_req, res) => {
 app.use(express.static(publicDir, { etag: !isDev, lastModified: !isDev, maxAge: isDev ? 0 : '1h' }));
 
 app.post('/api/classify', async (req, res) => {
-  const { text, metadata } = req.body ?? {};
+  const { text } = req.body ?? {};
+  // Default params only cover undefined; a null or non-object metadata would throw later.
+  const metadata = req.body?.metadata && typeof req.body.metadata === 'object' ? req.body.metadata : {};
   if (typeof text !== 'string' || !text.trim()) {
     return res.status(400).json({ error: 'Missing text' });
   }

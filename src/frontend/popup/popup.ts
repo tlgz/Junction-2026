@@ -53,6 +53,7 @@ async function renderCount(): Promise<void> {
 
 /** Saves a change and offers a reload if it changes what this tab should do. */
 async function update(patch: Partial<Settings>): Promise<void> {
+  if (!settings) return; // clicked before init() finished loading
   const before = host ? isActiveOn(host, settings) : false;
   settings = { ...settings, ...patch };
   await chrome.storage.local.set(patch);

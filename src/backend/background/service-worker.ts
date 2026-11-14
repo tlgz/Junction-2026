@@ -24,13 +24,16 @@ let active = 0;
 const waiting: (() => void)[] = [];
 
 async function limited<T>(task: () => Promise<T>): Promise<T> {
+  // A finished task hands its slot straight to the next waiter, so a new caller
+  // can't grab it in between and push the count past MAX_CONCURRENT.
   if (active >= MAX_CONCURRENT) await new Promise<void>((resolve) => waiting.push(resolve));
-  active++;
+  else active++;
   try {
     return await task();
   } finally {
-    active--;
-    waiting.shift()?.();
+    const next = waiting.shift();
+    if (next) next();
+    else active--;
   }
 }
 
