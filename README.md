@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="logo_white.png">
+    <img alt="Dnoise Logo" src="logo_black.png" width="96">
+  </picture>
+</p>
+
 # Dnoise
 
 Chrome extension (Manifest V3) that hides propaganda and phishing posts on X/Twitter behind a clean filter, with labels, a details view of predictions, and a "show anyways" button.

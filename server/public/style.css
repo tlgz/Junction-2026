@@ -30,10 +30,21 @@ body {
 }
 
 .brand {
-  font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-size: 1.1rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   color: #14161a;
+}
+
+.brand-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
 }
 
 /* ── Hero Layout ────────────────────────────────────────────────────────── */
@@ -162,10 +173,20 @@ body {
 }
 
 .dnoise-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: #71767b;
+}
+
+.dnoise-tag-icon {
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+  display: block;
 }
 
 .dnoise-summary {
