@@ -27,7 +27,7 @@
         your attention.
       </p>
       <div class="cta-row">
-        <a href="#download" class="btn btn-primary">Download extension &rarr;</a>
+        <a href="https://github.com/tlgz/Junction-2026/releases/latest/download/dnoise-extension.zip" class="btn btn-primary" id="download-btn">Download extension &rarr;</a>
         <a href="#how-it-works" class="btn btn-secondary">How it works?</a>
       </div>
     </section>
@@ -290,6 +290,47 @@
     </div>
   </section>
 
+  <!-- Install instructions (opened by the Download button) -->
+  <dialog class="install-dialog" id="install-dialog" aria-labelledby="install-title">
+    <div class="install-head">
+      <div>
+        <h2 id="install-title">Install Dnoise in Chrome</h2>
+        <p class="install-sub">Your download has started. <span id="install-version"></span></p>
+      </div>
+      <button type="button" class="install-close" id="install-close" aria-label="Close">&#10005;</button>
+    </div>
+    <ol class="install-steps">
+      <li>
+        <strong>Unzip the download.</strong>
+        Extract <code>dnoise-extension.zip</code>, you get a folder called <code>dnoise-extension</code>.
+        Didn't start? <a href="https://github.com/tlgz/Junction-2026/releases/latest/download/dnoise-extension.zip" id="install-retry">Download again</a>.
+      </li>
+      <li>
+        <strong>Open the extensions page.</strong>
+        Paste this into Chrome's address bar:
+        <span class="install-copy-row">
+          <code>chrome://extensions</code>
+          <button type="button" class="install-copy" id="install-copy">Copy</button>
+        </span>
+      </li>
+      <li>
+        <strong>Turn on Developer mode</strong> with the toggle in the top-right corner.
+      </li>
+      <li>
+        <strong>Click &ldquo;Load unpacked&rdquo;</strong> and select the unzipped <code>dnoise-extension</code> folder
+        (the one containing <code>manifest.json</code>).
+      </li>
+      <li>
+        <strong>Pin it and open X.</strong> Click the puzzle icon in the toolbar, pin Dnoise, then scroll your feed.
+      </li>
+    </ol>
+    <p class="install-foot">
+      Hackathon demo build, always the latest from
+      <a href="https://github.com/tlgz/Junction-2026/releases/latest" target="_blank" rel="noopener">GitHub Releases</a>.
+      To update, download again, replace the folder and press the reload icon on the Dnoise card.
+    </p>
+  </dialog>
+
   <script>
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
@@ -344,6 +385,49 @@
     hideBtn?.addEventListener('click', shieldPost);
     removeBtn?.addEventListener('click', () => {
       banner.hidden = true;
+    });
+
+    // Download button: start the download and show install instructions
+    const downloadBtn = document.getElementById('download-btn');
+    const installDialog = document.getElementById('install-dialog');
+    const installVersion = document.getElementById('install-version');
+    let releaseLoaded = false;
+
+    async function loadReleaseInfo() {
+      if (releaseLoaded) return;
+      releaseLoaded = true;
+      try {
+        const res = await fetch('https://api.github.com/repos/tlgz/Junction-2026/releases/latest');
+        if (!res.ok) return;
+        const rel = await res.json();
+        const date = new Date(rel.published_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        installVersion.textContent = `Version ${rel.tag_name.replace(/^v/, '')} · built ${date}`;
+      } catch {
+        // Version info is optional
+      }
+    }
+
+    downloadBtn?.addEventListener('click', () => {
+      // Let the link's default download proceed, then show the guide
+      if (typeof installDialog?.showModal === 'function') {
+        installDialog.showModal();
+        loadReleaseInfo();
+      }
+    });
+    document.getElementById('install-close')?.addEventListener('click', () => installDialog.close());
+    installDialog?.addEventListener('click', (e) => {
+      if (e.target === installDialog) installDialog.close();
+    });
+
+    const copyBtn = document.getElementById('install-copy');
+    copyBtn?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText('chrome://extensions');
+        copyBtn.textContent = 'Copied';
+      } catch {
+        copyBtn.textContent = 'Copy failed';
+      }
+      setTimeout(() => (copyBtn.textContent = 'Copy'), 1600);
     });
 
     // Trigger staggered reveal once when "How it works" cards are well into view
