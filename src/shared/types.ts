@@ -39,11 +39,18 @@ export interface Verdict {
   predictions: Prediction[];
 }
 
+export interface OverlayTarget {
+  /** Element whose content (text, media, quotes) gets covered. */
+  container: HTMLElement;
+  /** Optional element at the top of `container` that stays visible (e.g. author row). */
+  header: HTMLElement | null;
+}
+
 export interface PlatformAdapter {
   name: string;
   hosts: string[];
   postSelector: string;
   extractPost(post: HTMLElement): PostData;
-  /** The element the overlay covers: the post's visual content, not its full row. */
-  getOverlayTarget(post: HTMLElement): HTMLElement;
+  /** Where the overlay mounts: covers `container` below `header` (kept visible). */
+  getOverlayTarget(post: HTMLElement): OverlayTarget;
 }

@@ -1,7 +1,7 @@
 // Covers a flagged post with the CivicGuard interception card and blur,
 // and connects a compact warning banner when revealed. Contains no detection logic.
 
-import type { Verdict } from "../../shared/types";
+import type { OverlayTarget, Verdict } from "../../shared/types";
 import { createChevronSvg, el, swallow } from "../dom";
 import { renderReasons } from "./details";
 import "./overlay.css";
@@ -9,6 +9,8 @@ import "./overlay.css";
 const FLAGGED = "pd3k-flagged";
 const SHIELDED = "pd3k-shielded";
 const EXPANDED = "pd3k-expanded";
+/** Breathing room between the author row and the overlay. */
+const HEADER_GAP = 8;
 
 const SUMMARY_TEXT =
   "This post shows strong indicators of coordinated propaganda or manipulative framing.";
@@ -42,9 +44,25 @@ function createInfoSection(verdict: Verdict): {
   return { btn, details, toggle };
 }
 
-export function mountOverlay(target: HTMLElement, verdict: Verdict): void {
+/** Pauses any playing media inside the post so it can't be watched under the blur. */
+function pauseMedia(root: HTMLElement): void {
+  root.querySelectorAll<HTMLMediaElement>("video, audio").forEach((m) => {
+    if (!m.paused) m.pause();
+  });
+}
+
+export function mountOverlay({ container: target, header }: OverlayTarget, verdict: Verdict): void {
   const likelihood = getLikelihood(verdict);
   target.classList.add(FLAGGED, SHIELDED);
+
+  /** Starts the overlay just below the header so the author row stays visible. */
+  const syncOffset = () => {
+    const top = header
+      ? Math.max(0, header.getBoundingClientRect().bottom - target.getBoundingClientRect().top)
+      : 0;
+    overlay.style.top = `${Math.round(top) + HEADER_GAP}px`;
+  };
+  const resizeObserver = new ResizeObserver(syncOffset);
 
   // ── Shielded Overlay ──
   const pill = el(
@@ -78,11 +96,16 @@ export function mountOverlay(target: HTMLElement, verdict: Verdict): void {
   );
   overlay.addEventListener("click", swallow);
 
+  // Feeds autoplay video; keep anything inside a shielded post paused.
+  const onPlay = (e: Event) => {
+    if (target.classList.contains(SHIELDED)) (e.target as HTMLMediaElement).pause();
+  };
+
   // ── Revealed Banner ──
   const warningText = el(
     "p",
     "pd3k-revealed-text",
-    `⚠ Post Revealed by User — ${likelihood}% Propaganda Likelihood flagged content`,
+    `Revealed · ${likelihood}% propaganda likelihood`,
   );
   const revealedInfo = createInfoSection(verdict);
   revealedInfo.btn.classList.add("pd3k-info-btn-compact");
@@ -121,8 +144,10 @@ export function mountOverlay(target: HTMLElement, verdict: Verdict): void {
     const isOpen = !shieldInfo.details.hidden;
     revealedInfo.toggle(isOpen);
     overlay.remove();
+    resizeObserver.disconnect();
     target.classList.remove(SHIELDED, EXPANDED);
-    target.prepend(banner);
+    if (header?.parentElement === target) header.after(banner);
+    else target.prepend(banner);
   });
 
   hideBtn.addEventListener("click", (e) => {
@@ -132,14 +157,24 @@ export function mountOverlay(target: HTMLElement, verdict: Verdict): void {
     banner.remove();
     target.classList.add(SHIELDED);
     target.classList.toggle(EXPANDED, isOpen);
-    target.appendChild(overlay);
+    shield();
   });
 
   removeBtn.addEventListener("click", (e) => {
     swallow(e);
     banner.remove();
+    target.removeEventListener("play", onPlay, true);
     target.classList.remove(FLAGGED, SHIELDED, EXPANDED);
   });
 
-  target.appendChild(overlay);
+  function shield(): void {
+    target.appendChild(overlay);
+    syncOffset();
+    resizeObserver.observe(target);
+    if (header) resizeObserver.observe(header);
+    pauseMedia(target);
+  }
+
+  target.addEventListener("play", onPlay, true);
+  shield();
 }

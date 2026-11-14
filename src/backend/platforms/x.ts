@@ -48,36 +48,17 @@ export const xAdapter: PlatformAdapter = {
     };
   },
 
-  // The tweet content container directly below the author header. This covers
-  // the tweet text, media and quote-tweets while leaving the username visible.
+  // The tweet's right-hand column. The overlay covers everything below the
+  // author row (text, media, quote-tweets, action bar) so the username stays visible.
   getOverlayTarget(post) {
     const author = post.querySelector(SEL.author);
     const text = post.querySelector(SEL.text);
-    if (!author || !text) return post;
+    if (!author || !text) return { container: post, header: null };
     const column = commonAncestor(author, text, post);
 
-    let authorChild: Element | null = author;
-    while (authorChild && authorChild.parentElement !== column) {
-      authorChild = authorChild.parentElement;
-    }
+    let header: Element | null = author;
+    while (header && header.parentElement !== column) header = header.parentElement;
 
-    let contentChild = authorChild?.nextElementSibling;
-    while (contentChild && !(contentChild instanceof HTMLElement)) {
-      contentChild = contentChild.nextElementSibling;
-    }
-
-    if (contentChild instanceof HTMLElement && contentChild.contains(text)) {
-      return contentChild;
-    }
-
-    let textChild: Element | null = text;
-    while (textChild && textChild.parentElement !== column) {
-      textChild = textChild.parentElement;
-    }
-    if (textChild instanceof HTMLElement) {
-      return textChild;
-    }
-
-    return column;
+    return { container: column, header: header instanceof HTMLElement ? header : null };
   },
 };

@@ -18,6 +18,7 @@ const cache = new Map<string, Promise<Verdict>>();
 
 async function analyze(post: PostData): Promise<Verdict> {
   const config = await loadConfig();
+  console.log(`[pd3k:worker] Analyzing ${post.handle || "post"} via ${config.apiUrl || "mock"}`);
   const predictions = config.apiUrl ? await classify(post, config) : await mockPredict(post);
   return buildVerdict(predictions);
 }
@@ -25,7 +26,10 @@ async function analyze(post: PostData): Promise<Verdict> {
 function analyzeCached(post: PostData): Promise<Verdict> {
   const key = post.text;
   const hit = cache.get(key);
-  if (hit) return hit;
+  if (hit) {
+    console.debug(`[pd3k:worker] Cache hit for ${post.handle || "post"}`);
+    return hit;
+  }
 
   const pending = analyze(post);
   cache.set(key, pending);
@@ -39,9 +43,14 @@ chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) =
   if (!isAnalyzeMessage(message)) return false;
 
   analyzeCached(message.post).then(
-    (verdict): void => sendResponse({ ok: true, verdict } satisfies AnalyzeResponse),
-    (error: unknown): void =>
-      sendResponse({ ok: false, error: String(error) } satisfies AnalyzeResponse),
+    (verdict): void => {
+      console.log(`[pd3k:worker] Verdict for ${message.post.handle || "post"}: hide=${verdict.hide}`);
+      sendResponse({ ok: true, verdict } satisfies AnalyzeResponse);
+    },
+    (error: unknown): void => {
+      console.error(`[pd3k:worker] Failed for ${message.post.handle || "post"}:`, error);
+      sendResponse({ ok: false, error: String(error) } satisfies AnalyzeResponse);
+    },
   );
   return true; // keep the channel open for the async response
 });
