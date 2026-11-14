@@ -21,7 +21,10 @@ async function copyStatic() {
 
 /** @type {import("esbuild").BuildOptions} */
 const options = {
-  entryPoints: { content: "src/backend/content/main.ts" },
+  entryPoints: {
+    content: "src/backend/content/main.ts",
+    background: "src/backend/background/service-worker.ts",
+  },
   outdir,
   bundle: true,
   format: "iife",

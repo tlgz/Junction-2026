@@ -14,7 +14,10 @@ All source lives in `src/`, split by responsibility:
 
 - Frontend renders and handles interaction. No detection logic, no site selectors.
 - Backend decides and orchestrates. It never creates UI; it calls the frontend.
-- Detection is pure: post data in, verdict out, no DOM access.
+- Content scripts never call the AI service. They send extracted post data to the background service worker, which owns the network call, the API key and the cache.
+- The wire format of the AI service lives in one file (the API client). Treat API responses as untrusted and validate them.
+- Verdict logic is pure: predictions in, verdict out, no DOM access.
+- A failed or missing analysis must never hide a post.
 - Site-specific selectors and post parsing live only in platform adapters, one per site.
 - Keep files small and single-purpose (< 150 lines).
 
@@ -34,7 +37,7 @@ All source lives in `src/`, split by responsibility:
 - Prefix all CSS classes with `pd3k-` to avoid clashing with host styles.
 - Batch observer work and avoid layout reads inside observers.
 - Strict MV3 CSP: no `eval`, no inline scripts, no `innerHTML` with post data. Request minimum permissions.
-- Analyze post content locally or via privacy-preserving endpoints only.
+- Post text leaves the browser only through the API client. Never log post content, never put API keys in source or the bundle (use `chrome.storage.local`).
 
 ## Verification
 

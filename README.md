@@ -13,6 +13,16 @@ npm run build      # or: npm run watch
 
 Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacked** and select the `dist/` folder.
 
+## Connecting the AI service
+
+Until an endpoint is configured the extension uses mock predictions. To connect a real service, open the extension's service worker console (`chrome://extensions` > PropagandaDestroyer3000 > service worker) and run:
+
+```js
+chrome.storage.local.set({ apiUrl: "https://your-endpoint", apiKey: "..." })
+```
+
+Each post's text and metadata is sent as JSON to `apiUrl`. The request and response shapes are defined in `src/backend/api/client.ts`. The extension also needs permission for the endpoint's host (`optional_host_permissions` in `src/manifest.json`).
+
 ## Scripts
 
 - `npm run build`: production build into `dist/`

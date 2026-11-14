@@ -1,4 +1,4 @@
-// Placeholder predictions until real detection is implemented.
+// Placeholder predictions used while no API endpoint is configured.
 
 import type { PostData, Prediction } from "../../shared/types";
 
