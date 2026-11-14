@@ -28,16 +28,17 @@ const MODEL = process.env.MODEL || 'gpt-4.1-mini'; // see https://router.hosting
 const MAX_TEXT_CHARS = 4000;
 
 if (!process.env.HOSTINGER_AI_KEY) {
-  console.error('HOSTINGER_AI_KEY is not set (see .env.example).');
-  process.exit(1);
+  console.warn('HOSTINGER_AI_KEY is not set; /api/classify will return empty predictions.');
 }
 
-const client = new OpenAI({
-  baseURL: process.env.HOSTINGER_AI_ROUTER_URL || 'https://router.hostinger.com/v1',
-  apiKey: process.env.HOSTINGER_AI_KEY,
-  timeout: 8_000, // extension times out at 10s; fail before it does
-  maxRetries: 1,
-});
+const client = process.env.HOSTINGER_AI_KEY
+  ? new OpenAI({
+      baseURL: process.env.HOSTINGER_AI_ROUTER_URL || 'https://router.hostinger.com/v1',
+      apiKey: process.env.HOSTINGER_AI_KEY,
+      timeout: 8_000, // extension times out at 10s; fail before it does
+      maxRetries: 1,
+    })
+  : null;
 
 const SYSTEM_PROMPT = `You are a social media propaganda detection system.
 Analyze the tweet content and author metadata. Determine if it contains propaganda, state-sponsored bot messaging, disinformation, or psychological manipulation.
@@ -79,22 +80,64 @@ function parseModelJson(content) {
   return { predictions: Array.isArray(parsed?.predictions) ? parsed.predictions : [] };
 }
 
+const isDev = process.argv.includes('--dev');
+const publicDir = path.join(__dirname, 'public');
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '64kb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+if (isDev) {
+  const clients = new Set();
+
+  app.get('/__livereload', (req, res) => {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    });
+    res.write('\n');
+    clients.add(res);
+    req.on('close', () => clients.delete(res));
+  });
+
+  if (fs.existsSync(publicDir)) {
+    fs.watch(publicDir, { recursive: true }, () => {
+      for (const res of clients) {
+        res.write('data: reload\n\n');
+      }
+    });
+  }
+}
 
 app.get('/health', (_req, res) => res.json({ ok: true, model: MODEL }));
 app.get('/', (_req, res) => {
-  const file = path.join(__dirname, 'public', 'index.html');
-  if (fs.existsSync(file)) return res.sendFile(file);
+  const file = path.join(publicDir, 'index.html');
+  if (fs.existsSync(file)) {
+    if (isDev) {
+      const html = fs.readFileSync(file, 'utf8');
+      const liveReloadScript =
+        `<script>new EventSource('/__livereload').onmessage = () => location.reload();</script>`;
+      const injected = html.includes('</body>')
+        ? html.replace('</body>', `${liveReloadScript}\n</body>`)
+        : `${html}\n${liveReloadScript}`;
+      res.setHeader('Cache-Control', 'no-store');
+      return res.type('html').send(injected);
+    }
+    return res.sendFile(file);
+  }
   res.send('<!DOCTYPE html><html><body style="font-family:sans-serif;background:#ffffff;color:#000000;padding:2rem;"><h1>Hello World</h1><p>dnoise.tech</p></body></html>');
 });
+
+app.use(express.static(publicDir, { etag: !isDev, lastModified: !isDev, maxAge: isDev ? 0 : '1h' }));
 
 app.post('/api/classify', async (req, res) => {
   const { text, metadata } = req.body ?? {};
   if (typeof text !== 'string' || !text.trim()) {
     return res.status(400).json({ error: 'Missing text' });
+  }
+  if (!client) {
+    return res.json({ predictions: [] });
   }
 
   const started = Date.now();
@@ -119,4 +162,6 @@ app.post('/api/classify', async (req, res) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => console.log(`Propaganda backend running on http://0.0.0.0:${PORT} (model: ${MODEL})`));
+app.listen(PORT, '0.0.0.0', () =>
+  console.log(`Dnoise server running on http://localhost:${PORT} (model: ${MODEL})`),
+);

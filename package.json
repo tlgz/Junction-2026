@@ -7,6 +7,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
+    "dev": "npm --prefix server run dev",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

@@ -31,15 +31,17 @@ chrome.storage.local.set({ apiUrl: "http://<VPS-IP>:3000/api/classify" })
 
 ## Scripts
 
-- `npm run build`: production build into `dist/`
-- `npm run watch`: rebuild on change
-- `npm run typecheck`: type-check without emitting
+- `npm run dev`: start the local server & standalone web page (`server/public/index.html`) at `http://localhost:3000` with live reload
+- `npm run build`: production extension build into `dist/`
+- `npm run watch`: rebuild extension on change
+- `npm run typecheck`: type-check extension TypeScript without emitting
 
 ## Structure
 
-- `src/frontend/`: UI (popup, in-page overlay)
-- `src/backend/`: functionality (feed observer, detection, platform adapters)
-- `src/shared/`: shared types and constants
-- `server/`: classification backend (Hostinger VPS + AI Router)
+- `src/frontend/`: Chrome extension UI (popup, in-page overlay)
+- `src/backend/`: Chrome extension logic (feed observer, detection, platform adapters, service worker)
+- `src/shared/`: shared extension types and constants
+- `server/public/`: standalone web page (`dnoise.tech`), separate from the extension
+- `server/server.js`: classification backend (Hostinger VPS + AI Router) and static web server
 
 See [.agents/AGENTS.md](.agents/AGENTS.md) for architecture rules.

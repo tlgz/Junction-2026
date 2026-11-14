@@ -3,7 +3,6 @@ name: Deploy to Hostinger VPS
 on:
   push:
     branches:
-      - hostinger-live-demo
       - main
 
 jobs:

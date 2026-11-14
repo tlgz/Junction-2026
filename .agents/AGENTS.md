@@ -4,11 +4,15 @@ Chrome Extension (Manifest V3) that detects and hides propaganda/disinformation 
 
 ## Layout
 
-All source lives in `src/`, split by responsibility:
+The repository is split into two independent parts:
 
-- `src/frontend/`: UI only (popup, in-page overlay, styles).
-- `src/backend/`: logic only (feed observation, detection, platform adapters, background worker).
-- `src/shared/`: types and constants used by both layers. No logic.
+1. **Chrome Extension (`src/` -> `dist/`)**:
+   - `src/frontend/`: Extension UI only (popup, in-page feed overlay, styles).
+   - `src/backend/`: Extension logic only (feed observation, detection, platform adapters, background worker).
+   - `src/shared/`: Types and constants shared between extension frontend and backend. No logic.
+2. **VPS Server & Standalone Web Page (`server/`)**:
+   - `server/public/`: Standalone web page (`index.html`, `style.css`), completely separate from the Chrome extension. Run locally with `npm run dev` (`http://localhost:3000`).
+   - `server/server.js`: Classification API backend (`/api/classify`, `/health`) and static host for `server/public/` on the Hostinger VPS.
 
 ## Layer Rules
 
