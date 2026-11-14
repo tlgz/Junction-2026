@@ -20,7 +20,7 @@ export function createRevealedBanner({
   const warningText = el(
     "p",
     "pd3k-revealed-text",
-    `Revealed · ${likelihood}% propaganda likelihood`,
+    `${likelihood}% Propaganda Likelihood`,
   );
   const info = createInfoSection(verdict);
   info.btn.classList.add("pd3k-info-btn-compact");

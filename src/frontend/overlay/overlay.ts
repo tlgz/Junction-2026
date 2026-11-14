@@ -2,12 +2,10 @@
 // Fits in normal document flow so the host platform's layout and padding are preserved.
 
 import type { OverlayTarget, Verdict } from "../../shared/types";
-import { swallow } from "../dom";
+import { el, swallow } from "../dom";
 import { createRevealedBanner } from "./banner";
 import { createInterceptionCard } from "./card";
 import "./overlay.css";
-
-const FILTER_CLASS = "pd3k-filtered-content";
 
 function getLikelihood(verdict: Verdict): number {
   const propaganda = verdict.predictions.find((p) => p.category === "PROPAGANDA");
@@ -36,32 +34,36 @@ export function mountOverlay(target: OverlayTarget, verdict: Verdict): void {
     }
   };
 
-  const onFilteredClick = (e: Event) => {
+  const revealBtn = el("button", "pd3k-reveal-btn", "Reveal post anyway");
+  revealBtn.type = "button";
+  const revealScrim = el("div", "pd3k-reveal-scrim", revealBtn);
+  const blurInner = el("div", "pd3k-blur-inner");
+  const blurWrap = el("div", "pd3k-blur-wrap", blurInner, revealScrim);
+
+  const onRevealClick = (e: Event) => {
     swallow(e);
     reveal();
   };
+  revealBtn.addEventListener("click", onRevealClick);
+  revealScrim.addEventListener("click", onRevealClick);
 
   const applyFilter = () => {
-    for (const item of target.contentElements) {
-      item.classList.add(FILTER_CLASS);
-      item.title = "Click to reveal post";
-      item.addEventListener("click", onFilteredClick);
+    const first = target.contentElements[0];
+    if (first && first.parentElement) {
+      first.before(blurWrap);
+      for (const item of target.contentElements) {
+        blurInner.appendChild(item);
+      }
     }
   };
 
   const removeFilter = () => {
-    for (const item of target.contentElements) {
-      item.classList.remove(FILTER_CLASS);
-      item.removeAttribute("title");
-      item.removeEventListener("click", onFilteredClick);
+    if (blurWrap.isConnected) {
+      blurWrap.replaceWith(...target.contentElements);
     }
   };
 
-  const card = createInterceptionCard({
-    likelihood,
-    verdict,
-    onReveal: () => reveal(),
-  });
+  const card = createInterceptionCard({ likelihood, verdict });
 
   const banner = createRevealedBanner({
     likelihood,

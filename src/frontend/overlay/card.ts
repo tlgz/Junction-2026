@@ -1,4 +1,4 @@
-// Renders the Dnoise interception card shown over a shielded propaganda post.
+// Renders the Dnoise interception card shown above a shielded propaganda post.
 
 import type { Verdict } from "../../shared/types";
 import { el, swallow } from "../dom";
@@ -10,21 +10,18 @@ const SUMMARY_TEXT =
 export interface CardOptions {
   likelihood: number;
   verdict: Verdict;
-  onReveal: () => void;
 }
 
 export function createInterceptionCard({
   likelihood,
   verdict,
-  onReveal,
 }: CardOptions): HTMLElement {
   const pill = el(
     "span",
     "pd3k-likelihood-pill",
-    el("span", "pd3k-likelihood-dot"),
     `${likelihood}% Propaganda Likelihood`,
   );
-  const brand = el("span", "pd3k-brand-label", "DENOISE INTERCEPTION");
+  const brand = el("span", "pd3k-brand-label", "DNOISE INTERCEPTION");
   const metaRow = el("div", "pd3k-meta-row", pill, brand);
   const summary = el("p", "pd3k-summary", SUMMARY_TEXT);
   const info = createInfoSection(verdict);
@@ -34,20 +31,13 @@ export function createInterceptionCard({
     info.toggle();
   });
 
-  const revealBtn = el("button", "pd3k-reveal-btn", "Reveal post anyway");
-  revealBtn.type = "button";
-  revealBtn.addEventListener("click", (e) => {
-    swallow(e);
-    onReveal();
-  });
-
   const card = el(
     "div",
     "pd3k-card",
     metaRow,
     summary,
     info.details,
-    el("div", "pd3k-actions", info.btn, revealBtn),
+    el("div", "pd3k-actions", info.btn),
   );
   card.addEventListener("click", swallow);
 
