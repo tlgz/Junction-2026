@@ -70,7 +70,7 @@ Return ONLY a valid JSON object matching this schema:
 }
 
 If the tweet is normal political discourse, personal opinion, or benign news, return confidence under 0.4.
-If it exhibits whataboutism, coordinated disinfo talking points, extreme rage-bait, or spoofed news domains, return confidence >= 0.7.`;
+If it exhibits whataboutism, coordinated disinfo talking points, or spoofed news domains, return confidence >= 0.7.`;
 
 app.post('/api/classify', async (req, res) => {
   const { text, metadata } = req.body;
