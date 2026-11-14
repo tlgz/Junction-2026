@@ -1,10 +1,19 @@
 # pd3k-backend
 
-Classification backend for Dnoise. Runs on the Hostinger VPS; inference runs on the Hostinger AI Router (no local model, the KVM 2 has no GPU).
+Classification backend for Dnoise. Runs on the Hostinger VPS (no GPU). Two steps per post:
+
+1. **Detect** ([detector.js](detector.js)): the Dnoise propaganda classifier on a Verda GPU container
+   ([../inference/](../inference/)) returns a propaganda score. It decides whether a post is flagged.
+2. **Explain** ([explain.js](explain.js)): only if the score is at or above `PROPAGANDA_THRESHOLD`, an LLM
+   on Verda's inference API (`kimi-k3-1-pro` by default) explains why in 2 to 4 short reasons, using linked
+   pages scraped by Oxylabs as extra context.
 
 ```
-Chrome extension --POST /api/classify--> VPS (server.js) --OpenAI SDK--> Hostinger AI Router
+Chrome extension --POST /api/classify--> VPS (server.js) --1. detect--> Verda (Dnoise classifier)
+                                                         --2. explain (flagged only)--> Verda inference API (LLM)
 ```
+
+Both steps use the same Verda inference API key, which stays on the VPS. The extension only talks to the VPS.
 
 ## Run on the VPS
 
@@ -16,7 +25,7 @@ scp -r server root@<VPS-IP>:~/pd3k-backend
 ssh root@<VPS-IP>
 cd ~/pd3k-backend
 npm install
-cp .env.example .env   # then put your AI Router key in .env
+cp .env.example .env   # then put your Verda key in .env
 npm start
 ```
 
@@ -28,11 +37,14 @@ To keep it running after logout, install `pd3k-backend.service` (instructions in
 
 | Variable | Default |
 | --- | --- |
-| `HOSTINGER_AI_KEY` | required |
-| `HOSTINGER_AI_ROUTER_URL` | `https://router.hostinger.com/v1` |
-| `MODEL` | `gpt-4.1-mini` (also good: `gemini-3.5-flash-lite-eu`, `deepseek-v4.1-flash`; full list: `curl https://router.hostinger.com/v1/models`) |
+| `VERDA_URL` | required. Verda deployment URL + `/api/classify`, e.g. `https://containers.datacrunch.io/dnoise/api/classify` |
+| `VERDA_API_KEY` | required. Verda inference API key (Verda console: Credentials -> Inference API Keys). Used by the detector and the explainer |
+| `PROPAGANDA_THRESHOLD` | `0.40`. Score at which a post is flagged and explained. Keep in sync with `HIDE_THRESHOLDS.PROPAGANDA` in `src/backend/detection/verdict.ts` |
+| `EXPLAINER_MODEL` | `kimi-k3-1-pro` (also available: `deepseek-4-1-flash-1017`) |
+| `EXPLAINER_URL` | `https://inference.verda.com/v1` (any OpenAI-compatible API) |
+| `EXPLAINER_API_KEY` | defaults to `VERDA_API_KEY` |
 | `PORT` | `3000` |
-| `OXYLABS_API_KEY` | optional. Oxylabs AI Studio key: links in flagged content are scraped (AI-Scraper, markdown) and shown to the classifier |
+| `OXYLABS_API_KEY` | optional. Oxylabs AI Studio key: links in flagged posts are scraped (AI-Scraper, markdown) and shown to the explainer |
 | `SCRAPE_BUDGET_MS` | `4000` (max time spent scraping per request) |
 
 ## Test
@@ -41,10 +53,13 @@ To keep it running after logout, install `pd3k-backend.service` (instructions in
 curl http://<VPS-IP>:3000/health
 curl -X POST http://<VPS-IP>:3000/api/classify \
   -H 'Content-Type: application/json' \
-  -d '{"text":"BREAKING: the media is hiding the truth! Share before they delete this!","metadata":{"author":"Real News","handle":"@realnews24","links":[]}}'
+  -d '{"text":"NATO provoked this war and the Nazi regime in Kiev is killing civilians in Donbass.","metadata":{"author":"Real News","handle":"@realnews24","lang":"en","links":[]}}'
 ```
 
-Errors from the AI Router return `{"predictions": []}`, so the extension never hides a post because of a backend failure.
+Response: `{"predictions":[{"category":"PROPAGANDA","confidence":0.93,"reasons":["..."]}]}`. Posts under the threshold get `reasons: []`.
+
+- Detector errors, timeouts or non-English posts (the model is English-only) return `{"predictions": []}`, so the extension never hides a post because of a backend failure.
+- If the explainer fails, the post is still flagged, with a generic reason.
 
 ## Connect the extension
 

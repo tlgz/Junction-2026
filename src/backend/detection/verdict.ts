@@ -4,11 +4,12 @@ import type { Category, Prediction, Verdict } from "../../shared/types";
 
 /**
  * Minimum confidence per category to hide the post and appear as a label.
- * Propaganda/misinformation stay at 0.7, the value the server prompt anchors
- * the model to. Scams/phishing sit lower: distinct patterns, direct harm.
+ * Propaganda comes from the Dnoise classifier, whose tuned threshold is 0.40
+ * (keep in sync with PROPAGANDA_THRESHOLD on the server). The others stay at
+ * the values the old LLM prompt anchored to.
  */
 export const HIDE_THRESHOLDS: Record<Category, number> = {
-  PROPAGANDA: 0.7,
+  PROPAGANDA: 0.4,
   MISINFORMATION: 0.7,
   SCAM: 0.65,
   PHISHING: 0.65,

@@ -30,7 +30,7 @@ chrome.storage.local.set({ apiUrl: "https://your-endpoint", apiKey: "..." })
 
 Each post's text and metadata is sent as JSON to `apiUrl`. The request and response shapes are defined in `src/backend/api/client.ts`. The manifest grants `host_permissions` for any `http`/`https` host so the extension can reach the VPS by IP.
 
-The backend lives in [server/](server/): a small Node.js server for the Hostinger VPS that forwards posts to the Hostinger AI Router. See [server/README.md](server/README.md) for deployment. Once it runs, point the extension at it:
+The backend lives in [server/](server/): a small Node.js server for the Hostinger VPS. It detects propaganda with the Dnoise classifier on a Verda GPU container ([inference/](inference/)) and, for flagged posts only, asks an LLM on Verda's inference API to explain why. See [server/README.md](server/README.md) for deployment. Once it runs, point the extension at it:
 
 ```js
 chrome.storage.local.set({ apiUrl: "http://<VPS-IP>:3000/api/classify" })
@@ -49,6 +49,7 @@ chrome.storage.local.set({ apiUrl: "http://<VPS-IP>:3000/api/classify" })
 - `src/backend/`: Chrome extension logic (feed observer, detection, platform adapters, service worker)
 - `src/shared/`: shared extension types and constants
 - `server/public/`: standalone web page (`dnoise.tech`), separate from the extension
-- `server/server.js`: classification backend (Hostinger VPS + AI Router) and static web server
+- `server/server.js`: classification backend (Hostinger VPS: Verda detector + Verda LLM explainer) and static web server
+- `inference/`: Docker image of the propaganda classifier served on Verda
 
 See [.agents/AGENTS.md](.agents/AGENTS.md) for architecture rules.

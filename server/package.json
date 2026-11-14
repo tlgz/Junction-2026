@@ -2,7 +2,7 @@
   "name": "pd3k-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "Dnoise classification backend (Hostinger VPS -> Hostinger AI Router).",
+  "description": "Dnoise classification backend (Hostinger VPS -> Verda detector + Hostinger AI Router explainer).",
   "type": "module",
   "engines": { "node": ">=20.12" },
   "scripts": {
