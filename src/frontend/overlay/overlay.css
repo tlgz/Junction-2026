@@ -1,4 +1,4 @@
-/* In-page CivicGuard styles for flagged propaganda posts. All classes prefixed pd3k-. */
+/* In-page Dnoise styles for flagged propaganda posts. All classes prefixed pd3k-. */
 
 .pd3k-card,
 .pd3k-revealed-wrap {
@@ -33,7 +33,7 @@
   }
 }
 
-/* ── CivicGuard Interception Card ────────────────────────────────────────── */
+/* ── Dnoise Interception Card ────────────────────────────────────────────── */
 
 .pd3k-card {
   display: flex;

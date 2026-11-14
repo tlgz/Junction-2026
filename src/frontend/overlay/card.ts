@@ -1,4 +1,4 @@
-// Renders the CivicGuard interception card shown over a shielded propaganda post.
+// Renders the Dnoise interception card shown over a shielded propaganda post.
 
 import type { Verdict } from "../../shared/types";
 import { el, swallow } from "../dom";
@@ -24,7 +24,7 @@ export function createInterceptionCard({
     el("span", "pd3k-likelihood-dot"),
     `${likelihood}% Propaganda Likelihood`,
   );
-  const brand = el("span", "pd3k-brand-label", "CIVICGUARD INTERCEPTION");
+  const brand = el("span", "pd3k-brand-label", "DENOISE INTERCEPTION");
   const metaRow = el("div", "pd3k-meta-row", pill, brand);
   const summary = el("p", "pd3k-summary", SUMMARY_TEXT);
   const info = createInfoSection(verdict);

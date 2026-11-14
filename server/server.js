@@ -1,4 +1,4 @@
-// PropagandaDestroyer3000 backend. Runs on the Hostinger VPS, forwards each
+// Dnoise backend. Runs on the Hostinger VPS, forwards each
 // post to the Hostinger AI Router (OpenAI-compatible) and returns predictions
 // in the shape the extension's API client expects:
 //   { predictions: [{ category, confidence, reasons }] }

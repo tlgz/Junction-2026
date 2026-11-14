@@ -1,4 +1,4 @@
-# PropagandaDestroyer3000 — Bare Minimum Hackathon Plan
+# Dnoise — Bare Minimum Hackathon Plan
 
 ## 1. The Core Verdict: Local Model vs. Hostinger AI Router
 
@@ -128,7 +128,7 @@ In `src/manifest.json`, ensure the extension can call your VPS:
 
 ### Step 3: Connect Extension to VPS
 1. Rebuild extension: `npm run build`
-2. In Chrome, open `chrome://extensions` -> click **Service worker** under PropagandaDestroyer3000.
+2. In Chrome, open `chrome://extensions` -> click **Service worker** under Dnoise.
 3. In the console, run:
 ```js
 chrome.storage.local.set({ apiUrl: "http://<YOUR-VPS-IP>:3000/api/classify" });

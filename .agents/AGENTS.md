@@ -1,4 +1,4 @@
-# AGENTS.md - PropagandaDestroyer3000
+# AGENTS.md - Dnoise
 
 Chrome Extension (Manifest V3) that detects and hides propaganda/disinformation posts on social media feeds (starting with X/Twitter).
 

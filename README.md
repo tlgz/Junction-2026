@@ -1,6 +1,6 @@
-# PropagandaDestroyer3000
+# Dnoise
 
-Chrome extension (Manifest V3) that hides propaganda and phishing posts on X/Twitter behind a blur, with labels, a details view of predictions, and a "show anyways" button.
+Chrome extension (Manifest V3) that hides propaganda and phishing posts on X/Twitter behind a clean filter, with labels, a details view of predictions, and a "show anyways" button.
 
 ## Setup
 
@@ -15,7 +15,7 @@ Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacke
 
 ## Connecting the AI service
 
-Until an endpoint is configured the extension uses mock predictions. To connect a real service, open the extension's service worker console (`chrome://extensions` > PropagandaDestroyer3000 > service worker) and run:
+Until an endpoint is configured the extension uses mock predictions. To connect a real service, open the extension's service worker console (`chrome://extensions` > Dnoise > service worker) and run:
 
 ```js
 chrome.storage.local.set({ apiUrl: "https://your-endpoint", apiKey: "..." })

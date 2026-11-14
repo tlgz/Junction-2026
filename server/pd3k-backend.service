@@ -4,7 +4,7 @@
 #   sudo systemctl daemon-reload && sudo systemctl enable --now pd3k-backend
 #   journalctl -u pd3k-backend -f
 [Unit]
-Description=PropagandaDestroyer3000 backend
+Description=Dnoise backend
 After=network-online.target
 Wants=network-online.target
 

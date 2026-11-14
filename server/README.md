@@ -1,6 +1,6 @@
 # pd3k-backend
 
-Classification backend for PropagandaDestroyer3000. Runs on the Hostinger VPS; inference runs on the Hostinger AI Router (no local model, the KVM 2 has no GPU).
+Classification backend for Dnoise. Runs on the Hostinger VPS; inference runs on the Hostinger AI Router (no local model, the KVM 2 has no GPU).
 
 ```
 Chrome extension --POST /api/classify--> VPS (server.js) --OpenAI SDK--> Hostinger AI Router
