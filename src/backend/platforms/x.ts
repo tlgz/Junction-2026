@@ -48,12 +48,36 @@ export const xAdapter: PlatformAdapter = {
     };
   },
 
-  // The tweet "island": the content column holding name, text, media and
-  // actions, excluding the avatar and the article's outer padding.
+  // The tweet content container directly below the author header. This covers
+  // the tweet text, media and quote-tweets while leaving the username visible.
   getOverlayTarget(post) {
     const author = post.querySelector(SEL.author);
     const text = post.querySelector(SEL.text);
     if (!author || !text) return post;
-    return commonAncestor(author, text, post);
+    const column = commonAncestor(author, text, post);
+
+    let authorChild: Element | null = author;
+    while (authorChild && authorChild.parentElement !== column) {
+      authorChild = authorChild.parentElement;
+    }
+
+    let contentChild = authorChild?.nextElementSibling;
+    while (contentChild && !(contentChild instanceof HTMLElement)) {
+      contentChild = contentChild.nextElementSibling;
+    }
+
+    if (contentChild instanceof HTMLElement && contentChild.contains(text)) {
+      return contentChild;
+    }
+
+    let textChild: Element | null = text;
+    while (textChild && textChild.parentElement !== column) {
+      textChild = textChild.parentElement;
+    }
+    if (textChild instanceof HTMLElement) {
+      return textChild;
+    }
+
+    return column;
   },
 };

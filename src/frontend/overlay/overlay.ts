@@ -2,7 +2,8 @@
 // and connects a compact warning banner when revealed. Contains no detection logic.
 
 import type { Verdict } from "../../shared/types";
-import { el, swallow } from "../dom";
+import { createChevronSvg, el, swallow } from "../dom";
+import { renderReasons } from "./details";
 import "./overlay.css";
 
 const FLAGGED = "pd3k-flagged";
@@ -11,8 +12,6 @@ const EXPANDED = "pd3k-expanded";
 
 const SUMMARY_TEXT =
   "This post shows strong indicators of coordinated propaganda or manipulative framing.";
-const EXPLANATION_TEXT =
-  "Our classifier flagged multiple rhetorical patterns and amplification signals commonly seen in coordinated influence campaigns.";
 
 function getLikelihood(verdict: Verdict): number {
   const propaganda = verdict.predictions.find((p) => p.category === "PROPAGANDA");
@@ -20,27 +19,7 @@ function getLikelihood(verdict: Verdict): number {
   return Math.max(0, Math.min(100, Math.round((primary?.confidence ?? 0.84) * 100)));
 }
 
-function createChevronSvg(): SVGSVGElement {
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", "0 0 20 20");
-  svg.setAttribute("width", "14");
-  svg.setAttribute("height", "14");
-  svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor");
-  svg.setAttribute("stroke-width", "2");
-  svg.setAttribute("stroke-linecap", "round");
-  svg.setAttribute("stroke-linejoin", "round");
-  svg.setAttribute("aria-hidden", "true");
-  svg.classList.add("pd3k-chevron");
-
-  const path = document.createElementNS(ns, "path");
-  path.setAttribute("d", "M5 7.5 10 12.5 15 7.5");
-  svg.appendChild(path);
-  return svg;
-}
-
-function createInfoSection(): {
+function createInfoSection(verdict: Verdict): {
   btn: HTMLButtonElement;
   details: HTMLElement;
   toggle: (open?: boolean) => void;
@@ -50,7 +29,7 @@ function createInfoSection(): {
   btn.type = "button";
   btn.setAttribute("aria-expanded", "false");
 
-  const details = el("div", "pd3k-details", el("p", "pd3k-details-text", EXPLANATION_TEXT));
+  const details = renderReasons(verdict);
   details.hidden = true;
 
   const toggle = (force?: boolean) => {
@@ -78,7 +57,7 @@ export function mountOverlay(target: HTMLElement, verdict: Verdict): void {
   const metaRow = el("div", "pd3k-meta-row", pill, brand);
   const summary = el("p", "pd3k-summary", SUMMARY_TEXT);
 
-  const shieldInfo = createInfoSection();
+  const shieldInfo = createInfoSection(verdict);
   const card = el(
     "div",
     "pd3k-card",
@@ -105,7 +84,7 @@ export function mountOverlay(target: HTMLElement, verdict: Verdict): void {
     "pd3k-revealed-text",
     `⚠ Post Revealed by User — ${likelihood}% Propaganda Likelihood flagged content`,
   );
-  const revealedInfo = createInfoSection();
+  const revealedInfo = createInfoSection(verdict);
   revealedInfo.btn.classList.add("pd3k-info-btn-compact");
   revealedInfo.details.classList.add("pd3k-details-revealed");
 

@@ -13,7 +13,7 @@
 }
 
 .pd3k-flagged.pd3k-shielded.pd3k-expanded {
-  min-height: 305px !important;
+  min-height: 330px !important;
 }
 
 /* ── Shielded Blur Overlay ──────────────────────────────────────────────── */
@@ -145,6 +145,51 @@
   font-size: 12.5px;
   color: #cbd5e1;
   line-height: 1.45;
+}
+
+.pd3k-prediction-group {
+  margin-bottom: 8px;
+}
+
+.pd3k-prediction-group:last-child {
+  margin-bottom: 0;
+}
+
+.pd3k-prediction-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f3c69f;
+  margin-bottom: 4px;
+}
+
+.pd3k-prediction-category {
+  font-weight: 700;
+}
+
+.pd3k-prediction-score {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.pd3k-reasons-list {
+  margin: 4px 0 0 0;
+  padding-left: 18px;
+  list-style-type: disc;
+}
+
+.pd3k-reason-item {
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.45;
+  margin-bottom: 3px;
+}
+
+.pd3k-reason-item:last-child {
+  margin-bottom: 0;
 }
 
 .pd3k-reveal-area {
