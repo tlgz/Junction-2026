@@ -22,6 +22,14 @@ function commonAncestor(a: Element, b: Element, root: HTMLElement): HTMLElement 
   return node instanceof HTMLElement ? node : root;
 }
 
+/** Finds the direct child of `column` that contains `descendant`. */
+function getColumnChild(descendant: Element | null, column: HTMLElement): HTMLElement | null {
+  if (!descendant || !column.contains(descendant)) return null;
+  let curr: Element | null = descendant;
+  while (curr && curr.parentElement !== column) curr = curr.parentElement;
+  return curr instanceof HTMLElement ? curr : null;
+}
+
 export const xAdapter: PlatformAdapter = {
   name: "x",
   hosts: ["x.com", "twitter.com"],
@@ -48,17 +56,30 @@ export const xAdapter: PlatformAdapter = {
     };
   },
 
-  // The tweet's right-hand column. The overlay covers everything below the
-  // author row (text, media, quote-tweets, action bar) so the username stays visible.
+  // Identifies the author header, content elements (text, media, quote-tweet),
+  // and action bar so the UI fits cleanly within native tweet padding.
   getOverlayTarget(post) {
     const author = post.querySelector(SEL.author);
     const text = post.querySelector(SEL.text);
-    if (!author || !text) return { container: post, header: null };
+    if (!author || !text) {
+      return { container: post, header: null, contentElements: [], actionBar: null };
+    }
     const column = commonAncestor(author, text, post);
+    const header = getColumnChild(author, column);
+    const actionBar = getColumnChild(post.querySelector('[role="group"]'), column);
 
-    let header: Element | null = author;
-    while (header && header.parentElement !== column) header = header.parentElement;
+    const contentElements: HTMLElement[] = [];
+    let curr = header ? header.nextElementSibling : column.firstElementChild;
+    while (curr && curr !== actionBar) {
+      if (curr instanceof HTMLElement) contentElements.push(curr);
+      curr = curr.nextElementSibling;
+    }
 
-    return { container: column, header: header instanceof HTMLElement ? header : null };
+    if (contentElements.length === 0) {
+      const textChild = getColumnChild(text, column);
+      if (textChild) contentElements.push(textChild);
+    }
+
+    return { container: column, header, contentElements, actionBar };
   },
 };

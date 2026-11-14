@@ -40,10 +40,14 @@ export interface Verdict {
 }
 
 export interface OverlayTarget {
-  /** Element whose content (text, media, quotes) gets covered. */
+  /** Element containing the tweet's main content column. */
   container: HTMLElement;
-  /** Optional element at the top of `container` that stays visible (e.g. author row). */
+  /** Author row header inside `container`, kept visible. */
   header: HTMLElement | null;
+  /** Content elements (text, media, quote-tweets) to filter when shielded. */
+  contentElements: HTMLElement[];
+  /** Action bar element below the content, if found. */
+  actionBar: HTMLElement | null;
 }
 
 export interface PlatformAdapter {
@@ -51,6 +55,6 @@ export interface PlatformAdapter {
   hosts: string[];
   postSelector: string;
   extractPost(post: HTMLElement): PostData;
-  /** Where the overlay mounts: covers `container` below `header` (kept visible). */
+  /** Identifies the layout elements of a post for filter and card placement. */
   getOverlayTarget(post: HTMLElement): OverlayTarget;
 }

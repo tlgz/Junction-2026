@@ -1,7 +1,7 @@
 // Renders the prediction reasons breakdown shown in the details drawer.
 
 import type { Verdict } from "../../shared/types";
-import { el } from "../dom";
+import { createChevronSvg, el } from "../dom";
 
 const EXPLANATION_FALLBACK =
   "Our classifier flagged multiple rhetorical patterns and amplification signals commonly seen in coordinated influence campaigns.";
@@ -38,4 +38,29 @@ export function renderReasons(verdict: Verdict): HTMLElement {
   }
 
   return container;
+}
+
+export interface InfoSection {
+  btn: HTMLButtonElement;
+  details: HTMLElement;
+  toggle: (force?: boolean) => void;
+}
+
+export function createInfoSection(verdict: Verdict): InfoSection {
+  const chevron = createChevronSvg();
+  const btn = el("button", "pd3k-info-btn", el("span", "", "See why & more info"), chevron);
+  btn.type = "button";
+  btn.setAttribute("aria-expanded", "false");
+
+  const details = renderReasons(verdict);
+  details.hidden = true;
+
+  const toggle = (force?: boolean) => {
+    const nextOpen = force ?? details.hidden;
+    details.hidden = !nextOpen;
+    btn.setAttribute("aria-expanded", String(nextOpen));
+    chevron.classList.toggle("pd3k-chevron-open", nextOpen);
+  };
+
+  return { btn, details, toggle };
 }

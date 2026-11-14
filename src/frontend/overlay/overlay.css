@@ -1,60 +1,60 @@
-/* In-page CivicGuard overlay for flagged posts. All classes are prefixed pd3k-. */
+/* In-page CivicGuard styles for flagged propaganda posts. All classes prefixed pd3k-. */
 
-.pd3k-flagged {
-  --pd3k-surface: #15171b;
-  --pd3k-surface-2: #1c1f24;
-  --pd3k-border: #2a2e35;
+.pd3k-card,
+.pd3k-revealed-wrap {
+  --pd3k-surface: #16181c;
+  --pd3k-surface-2: #202327;
+  --pd3k-border: #2f3336;
+  --pd3k-border-subtle: #38444d;
   --pd3k-text: #e7e9ea;
-  --pd3k-muted: #8b98a5;
-  --pd3k-red: #f4707a;
+  --pd3k-muted: #71767b;
+  --pd3k-red: #f4212e;
   --pd3k-red-strong: #ef4452;
-  --pd3k-red-soft: rgba(239, 68, 82, 0.1);
-  --pd3k-red-line: rgba(239, 68, 82, 0.32);
+  --pd3k-red-soft: rgba(244, 33, 46, 0.1);
+  --pd3k-red-line: rgba(244, 33, 46, 0.35);
 
-  position: relative !important;
-  border-radius: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
 }
 
-.pd3k-flagged.pd3k-shielded {
-  min-height: 290px !important;
+@media (prefers-color-scheme: light) {
+  :root:not([data-color-mode="dark"]) .pd3k-card,
+  :root:not([data-color-mode="dark"]) .pd3k-revealed-wrap {
+    --pd3k-surface: #f7f9f9;
+    --pd3k-surface-2: #eff3f4;
+    --pd3k-border: #cfd9de;
+    --pd3k-border-subtle: #e1e8ed;
+    --pd3k-text: #0f1419;
+    --pd3k-muted: #536471;
+    --pd3k-red: #f4212e;
+    --pd3k-red-strong: #e0245e;
+    --pd3k-red-soft: rgba(244, 33, 46, 0.08);
+    --pd3k-red-line: rgba(244, 33, 46, 0.25);
+  }
 }
 
-.pd3k-flagged.pd3k-shielded.pd3k-expanded {
-  min-height: 410px !important;
-}
-
-/* ── Shielded Blur Overlay ──────────────────────────────────────────────── */
-
-.pd3k-overlay {
-  position: absolute;
-  inset: 0 0 12px 0;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  border-radius: 12px;
-  border: 1px solid var(--pd3k-border);
-  overflow: hidden auto;
-  backdrop-filter: blur(28px) saturate(0.5);
-  -webkit-backdrop-filter: blur(28px) saturate(0.5);
-  background: rgba(15, 17, 20, 0.6);
-  cursor: default;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
-  color: var(--pd3k-text);
-}
+/* ── CivicGuard Interception Card ────────────────────────────────────────── */
 
 .pd3k-card {
-  background: rgba(21, 23, 27, 0.94);
-  border-bottom: 1px solid var(--pd3k-border);
-  padding: 16px 18px;
-  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--pd3k-surface);
+  border: 1px solid var(--pd3k-border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin: 8px 0 10px 0;
+  color: var(--pd3k-text);
+  cursor: default;
+  transition: border-color 0.15s ease;
 }
 
 .pd3k-meta-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .pd3k-likelihood-pill {
@@ -64,11 +64,11 @@
   background: var(--pd3k-red-soft);
   border: 1px solid var(--pd3k-red-line);
   color: var(--pd3k-red);
-  border-radius: 999px;
-  padding: 3px 10px;
+  border-radius: 9999px;
+  padding: 2px 10px;
   font-size: 12px;
-  font-weight: 600;
-  line-height: 1.3;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .pd3k-likelihood-dot {
@@ -81,7 +81,7 @@
 
 .pd3k-brand-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--pd3k-muted);
@@ -90,7 +90,7 @@
 .pd3k-summary {
   margin: 0;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--pd3k-text);
   line-height: 1.45;
 }
@@ -98,7 +98,10 @@
 .pd3k-actions {
   display: flex;
   align-items: center;
-  margin-top: 14px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .pd3k-info-btn {
@@ -107,25 +110,24 @@
   gap: 6px;
   background: var(--pd3k-surface-2);
   border: 1px solid var(--pd3k-border);
-  border-radius: 8px;
-  padding: 6px 12px;
+  border-radius: 9999px;
+  padding: 6px 14px;
   color: var(--pd3k-text);
   font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .pd3k-info-btn:hover {
-  background: #23272d;
-  border-color: #3a3f47;
+  background: #272c30;
+  border-color: #3e444a;
 }
 
 .pd3k-info-btn-compact {
-  padding: 4px 9px;
-  font-size: 11.5px;
-  border-radius: 7px;
+  padding: 4px 10px;
+  font-size: 12px;
 }
 
 .pd3k-chevron {
@@ -140,12 +142,54 @@
   transform: rotate(180deg);
 }
 
+.pd3k-reveal-btn {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: 1px solid #536471;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  color: var(--pd3k-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pd3k-reveal-btn:hover {
+  background: rgba(239, 243, 244, 0.1);
+  border-color: #71767b;
+}
+
+/* ── Filtered Post Content ──────────────────────────────────────────────── */
+
+.pd3k-filtered-content {
+  filter: blur(14px) saturate(0.5) !important;
+  opacity: 0.45 !important;
+  user-select: none !important;
+  cursor: pointer !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  max-height: 200px !important;
+  clip-path: inset(0 round 12px) !important;
+  transition: filter 0.2s ease, opacity 0.2s ease !important;
+  margin-bottom: 8px !important;
+  position: relative !important;
+}
+
+.pd3k-filtered-content:hover {
+  opacity: 0.65 !important;
+}
+
+/* ── Prediction Details Drawer ──────────────────────────────────────────── */
+
 .pd3k-details {
-  margin-top: 12px;
-  padding: 10px 12px;
+  margin-top: 10px;
+  padding: 12px 14px;
   background: #101215;
   border: 1px solid var(--pd3k-border);
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .pd3k-details-text {
@@ -200,42 +244,14 @@
   margin-bottom: 0;
 }
 
-.pd3k-reveal-area {
-  flex: 1 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  min-height: 72px;
-}
-
-.pd3k-reveal-btn {
-  background: rgba(21, 23, 27, 0.9);
-  border: 1px solid var(--pd3k-border);
-  border-radius: 999px;
-  padding: 8px 18px;
-  color: var(--pd3k-text);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.pd3k-reveal-btn:hover {
-  background: #23272d;
-  border-color: #3a3f47;
-}
-
-/* ── Revealed Connected Warning Banner ──────────────────────────────────── */
+/* ── Revealed Warning Banner ────────────────────────────────────────────── */
 
 .pd3k-revealed-wrap {
-  margin: 8px 0 10px;
+  margin: 6px 0 10px;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--pd3k-border);
   background: var(--pd3k-surface);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
   color: var(--pd3k-text);
 }
 
@@ -245,7 +261,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px 12px;
-  padding: 10px 14px;
+  padding: 8px 14px;
 }
 
 .pd3k-revealed-text {
@@ -254,7 +270,7 @@
   gap: 8px;
   margin: 0;
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--pd3k-red);
   line-height: 1.35;
   flex: 1 1 200px;
@@ -278,11 +294,11 @@
 
 .pd3k-btn-hide,
 .pd3k-btn-remove {
-  border-radius: 7px;
-  padding: 4px 9px;
+  border-radius: 9999px;
+  padding: 4px 10px;
   font-family: inherit;
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -294,8 +310,8 @@
 }
 
 .pd3k-btn-hide:hover {
-  background: #23272d;
-  border-color: #3a3f47;
+  background: #272c30;
+  border-color: #3e444a;
 }
 
 .pd3k-btn-remove {
@@ -306,8 +322,8 @@
 
 .pd3k-btn-remove:hover {
   color: var(--pd3k-text);
-  border-color: #3a3f47;
-  background: rgba(255, 255, 255, 0.04);
+  border-color: #3e444a;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .pd3k-details-revealed {
