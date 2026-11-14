@@ -17,11 +17,11 @@ body {
   margin-bottom: 4px;
 }
 
-.logo-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ef4452;
+.header-logo {
+  width: 20px;
+  height: 20px;
+  display: block;
+  object-fit: contain;
 }
 
 h2 {
