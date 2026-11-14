@@ -11,9 +11,15 @@ export interface ApiConfig {
   timeoutMs: number;
 }
 
-const DEFAULTS: ApiConfig = { apiUrl: "", apiKey: "", timeoutMs: 10_000 };
+const DEFAULT_API_URL = "http://179.67.199.148:3000/api/classify";
+
+const DEFAULTS: ApiConfig = { apiUrl: DEFAULT_API_URL, apiKey: "", timeoutMs: 10_000 };
 
 export async function loadConfig(): Promise<ApiConfig> {
   const stored = await chrome.storage.local.get(Object.keys(DEFAULTS));
-  return { ...DEFAULTS, ...stored };
+  const apiUrl =
+    typeof stored.apiUrl === "string" && stored.apiUrl.trim()
+      ? stored.apiUrl.trim()
+      : DEFAULT_API_URL;
+  return { ...DEFAULTS, ...stored, apiUrl };
 }
