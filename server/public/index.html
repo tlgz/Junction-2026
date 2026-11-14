@@ -209,6 +209,62 @@
     </div>
   </section>
 
+  <!-- Benchmark Section -->
+  <section class="bench-section" id="benchmark" aria-labelledby="bench-title">
+    <p class="bench-eyebrow">Custom Distilled Classifier &middot; 0.4B Parameters</p>
+    <h2 class="bench-heading" id="bench-title">Outperforming the leading X propaganda classifier</h2>
+
+    <div class="bench-card">
+      <div class="bench-stat">
+        <div class="bench-stat-num"><span>&minus;</span><span id="bench-count">42</span><span>%</span></div>
+        <p class="bench-stat-label">fewer missed propaganda posts</p>
+        <p class="bench-stat-note">vs. BERTweet-large, at the same 0.4B size.</p>
+        <a class="bench-link" href="https://huggingface.co/4smo/Dnoise-Bertweet-large-Kimi-K3.1-Pro-distillation-0.4B" target="_blank" rel="noopener">
+          View model on Hugging Face <span aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+
+      <div class="bench-panel">
+        <div class="bench-legend">
+          <span><i class="bench-swatch bench-swatch-base"></i>BERTweet-large</span>
+          <span><i class="bench-swatch bench-swatch-ours"></i>Dnoise</span>
+        </div>
+
+        <div class="bench-metric">
+          <div class="bench-metric-head">
+            <span>Miss rate</span>
+          </div>
+          <div class="bench-row">
+            <div class="bench-track"><div class="bench-bar bench-bar-base" style="--w: 100%"></div></div>
+            <span class="bench-val">22.2%</span>
+          </div>
+          <div class="bench-row">
+            <div class="bench-track">
+              <div class="bench-gap" style="--l: 58.1%; --w: 41.9%"></div>
+              <div class="bench-bar bench-bar-ours" style="--w: 58.1%"></div>
+            </div>
+            <span class="bench-val bench-val-ours">12.9%</span>
+          </div>
+          <span class="bench-badge">&minus;42%</span>
+        </div>
+
+        <div class="bench-metric">
+          <div class="bench-metric-head"><span>F1 score</span></div>
+          <div class="bench-row">
+            <div class="bench-track"><div class="bench-bar bench-bar-base" style="--w: 77.3%"></div></div>
+            <span class="bench-val">0.773</span>
+          </div>
+          <div class="bench-row">
+            <div class="bench-track"><div class="bench-bar bench-bar-ours" style="--w: 81.6%"></div></div>
+            <span class="bench-val bench-val-ours">0.816</span>
+          </div>
+          <span class="bench-badge">+5.6%</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- How It Works Section -->
   <section class="how-section" id="how-it-works" aria-label="How Dnoise works">
     <h2 class="how-heading">How it works</h2>
@@ -447,6 +503,41 @@
         observer.observe(howGrid);
       } else {
         howSection.classList.add('is-visible');
+      }
+    }
+
+    // Animate benchmark bars + count up the headline number once in view
+    const benchSection = document.getElementById('benchmark');
+    const benchCount = document.getElementById('bench-count');
+    if (benchSection) {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const runBench = () => {
+        benchSection.classList.add('is-visible');
+        if (!benchCount || reduceMotion) return;
+        const start = performance.now() + 650;
+        const dur = 1100;
+        const tick = (now) => {
+          const p = Math.min(Math.max((now - start) / dur, 0), 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          benchCount.textContent = String(Math.round(42 * eased));
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        benchCount.textContent = '0';
+        requestAnimationFrame(tick);
+      };
+      if ('IntersectionObserver' in window && !reduceMotion) {
+        const benchObserver = new IntersectionObserver(
+          (entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+              runBench();
+              benchObserver.disconnect();
+            }
+          },
+          { threshold: 0.45 },
+        );
+        benchObserver.observe(benchSection);
+      } else {
+        runBench();
       }
     }
 
