@@ -6,6 +6,22 @@
 import express from 'express';
 import cors from 'cors';
 import OpenAI from 'openai';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Auto-load .env if present and variables not yet in process.env
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+    const m = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+    if (m && !process.env[m[1]]) {
+      process.env[m[1]] = m[2].trim().replace(/^['"]|['"]$/g, '');
+    }
+  }
+}
 
 const PORT = Number(process.env.PORT) || 3000;
 const MODEL = process.env.MODEL || 'gpt-4.1-mini'; // see https://router.hostinger.com/v1/models
@@ -66,8 +82,14 @@ function parseModelJson(content) {
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '64kb' }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/health', (_req, res) => res.json({ ok: true, model: MODEL }));
+app.get('/', (_req, res) => {
+  const file = path.join(__dirname, 'public', 'index.html');
+  if (fs.existsSync(file)) return res.sendFile(file);
+  res.send('<!DOCTYPE html><html><body style="font-family:sans-serif;background:#090d16;color:#fff;padding:4rem;text-align:center;"><h1>👋 Hello World! Dnoise is Live on dnoise.tech</h1><p>Backend status: <b>OK</b> (Model: ' + MODEL + ')</p><p><a href="/health" style="color:#818cf8;">/health</a></p></body></html>');
+});
 
 app.post('/api/classify', async (req, res) => {
   const { text, metadata } = req.body ?? {};
@@ -97,4 +119,4 @@ app.post('/api/classify', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Propaganda backend running on port ${PORT} (model: ${MODEL})`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Propaganda backend running on http://0.0.0.0:${PORT} (model: ${MODEL})`));
