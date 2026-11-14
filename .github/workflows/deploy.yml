@@ -1,0 +1,37 @@
+name: Deploy to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - hostinger-live-demo
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Hostinger VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 179.67.199.148
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "server/**"
+          target: "/root/pd3k-backend"
+          strip_components: 1
+
+      - name: Restart backend on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 179.67.199.148
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /root/pd3k-backend
+            npm install --omit=dev
+            systemctl restart pd3k-backend
+            systemctl is-active pd3k-backend
