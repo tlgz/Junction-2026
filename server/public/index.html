@@ -5,85 +5,361 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dnoise — Filter manipulation from your feed</title>
-  <link rel="icon" type="image/svg+xml" href="logo.svg">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
   <header class="topbar">
-    <a href="#" class="brand">
-      <img src="logo_black.png" alt="Dnoise logo" class="brand-logo" width="28" height="28" />
-      <span>DNOISE</span>
-    </a>
+    <span class="brand">DNOISE</span>
   </header>
 
   <main class="hero">
     <section class="hero-copy">
       <h1>Keep coordinated manipulation out of your feed</h1>
       <p class="subtitle">
-        Dnoise detects propaganda, rage-bait, and manipulative framing on X in real time and shields it before it grabs your attention.
+        Dnoise detects propaganda, rage-bait, and manipulative framing on X in real time and shields it before it grabs
+        your attention.
       </p>
       <div class="cta-row">
         <a href="#download" class="btn btn-primary">Download extension &rarr;</a>
-        <a href="#info" class="btn btn-secondary">See more info</a>
+        <a href="#how-it-works" class="btn btn-secondary">How it works?</a>
       </div>
     </section>
 
-    <section class="hero-preview" aria-label="Example intercepted post">
-      <div class="preview-shell">
-        <div class="dnoise-card">
-          <div class="dnoise-meta">
-            <span class="dnoise-pill">84% Propaganda Likelihood</span>
-            <span class="dnoise-tag">
-              <img src="logo_white.png" alt="" class="dnoise-tag-icon" width="13" height="13" />
-              DNOISE INTERCEPTION
-            </span>
-          </div>
-          <p class="dnoise-summary">
-            This post shows strong indicators of coordinated propaganda or manipulative framing.
-          </p>
-          <div class="dnoise-actions">
-            <button type="button" class="dnoise-info-btn" id="preview-info-btn" aria-expanded="false">
-              <span>See why &amp; more info</span>
-              <svg class="dnoise-chevron" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M5 7.5 10 12.5 15 7.5" />
-              </svg>
-            </button>
-          </div>
-          <div class="dnoise-details" id="preview-details" hidden>
-            <p class="dnoise-details-text">
-              Flagged for emotionally charged framing, unverified sweeping claims, and narrative patterns associated with coordinated amplification.
+    <section class="hero-preview" aria-label="Interactive X feed demo">
+      <div class="x-feed">
+        <!-- Post 1: Normal -->
+        <article class="x-post">
+          <img class="x-avatar" src="assets/avatar-1.jpg" alt="" />
+          <div class="x-body">
+            <div class="x-header">
+              <span class="x-name">Milo Park</span>
+              <span class="x-handle">@milopark · 2h</span>
+            </div>
+            <p class="x-text">
+              Just finished replacing the thermal paste on my 2019 laptop and dropped idle temps by 14°C. Best Saturday
+              afternoon project.
             </p>
+            <div class="x-metrics" aria-hidden="true">
+              <span>&#128172; 18</span>
+              <span>&#8635; 4</span>
+              <span>&#9825; 214</span>
+              <span>&#128202; 4.2K</span>
+            </div>
           </div>
-        </div>
+        </article>
 
-        <div class="dnoise-blur-box">
-          <div class="dnoise-blur-shapes" aria-hidden="true">
-            <div class="blur-bar blur-bar-lg"></div>
-            <div class="blur-bar blur-bar-md"></div>
-            <div class="blur-bar blur-bar-sm"></div>
+        <!-- Post 2: Flagged with Dnoise -->
+        <article class="x-post" id="demo-flagged-post">
+          <img class="x-avatar" src="assets/avatar-2.jpg" alt="" />
+          <div class="x-body">
+            <div class="x-header">
+              <span class="x-name">Civic Pulse Wire</span>
+              <span class="x-handle">@civicpulse_wire · 4h</span>
+            </div>
+
+            <!-- Shielded Card -->
+            <div class="dnoise-card" id="demo-card">
+              <div class="dnoise-meta">
+                <span class="dnoise-pill">86% Propaganda Likelihood</span>
+                <span class="dnoise-tag">DNOISE INTERCEPTION</span>
+              </div>
+              <p class="dnoise-summary">
+                This post shows strong indicators of coordinated propaganda or manipulative framing.
+              </p>
+              <div class="dnoise-details" id="card-details" hidden>
+                <ul class="dnoise-reasons">
+                  <li>Fabricated "leaked document" urgency</li>
+                  <li>Unverified conspiracy claim</li>
+                  <li>Call to viral share before deletion</li>
+                </ul>
+              </div>
+              <div class="dnoise-actions">
+                <button type="button" class="dnoise-info-btn" id="card-info-btn" aria-expanded="false">
+                  <span>See why &amp; more info</span>
+                  <svg class="dnoise-chevron" viewBox="0 0 20 20" width="14" height="14" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="M5 7.5 10 12.5 15 7.5" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Revealed Banner -->
+            <div class="dnoise-revealed-wrap" id="demo-banner" hidden>
+              <div class="dnoise-revealed-banner">
+                <p class="dnoise-revealed-text">86% Propaganda Likelihood</p>
+                <div class="dnoise-revealed-actions">
+                  <button type="button" class="dnoise-info-btn dnoise-info-btn-compact" id="banner-info-btn"
+                    aria-expanded="false">
+                    <span>See why &amp; more info</span>
+                    <svg class="dnoise-chevron" viewBox="0 0 20 20" width="14" height="14" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      aria-hidden="true">
+                      <path d="M5 7.5 10 12.5 15 7.5" />
+                    </svg>
+                  </button>
+                  <button type="button" class="dnoise-btn-hide" id="demo-hide-btn">Hide</button>
+                  <button type="button" class="dnoise-btn-remove" id="demo-remove-btn"
+                    aria-label="Dismiss warning">&#10005;</button>
+                </div>
+              </div>
+              <div class="dnoise-details dnoise-details-revealed" id="banner-details" hidden>
+                <ul class="dnoise-reasons">
+                  <li>Fabricated "leaked document" urgency</li>
+                  <li>Unverified conspiracy claim</li>
+                  <li>Call to viral share before deletion</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Flagged Post Content (blurred when shielded) -->
+            <div class="dnoise-blur-wrap is-shielded" id="demo-blur-wrap">
+              <p class="x-text dnoise-blur-inner" id="demo-post-text">
+                URGENT: Leaked memos prove the Municipal Cloud Bureau is secretly replacing all downtown pigeons with
+                solar-powered surveillance drones! Share this immediately before they scrub it!!
+              </p>
+              <div class="dnoise-reveal-scrim" id="demo-reveal-scrim">
+                <button type="button" class="dnoise-reveal-btn" id="demo-reveal-btn">Reveal post anyway</button>
+              </div>
+            </div>
+
+            <div class="x-metrics" aria-hidden="true">
+              <span>&#128172; 41</span>
+              <span>&#8635; 89</span>
+              <span>&#9825; 312</span>
+              <span>&#128202; 28K</span>
+            </div>
           </div>
-          <div class="dnoise-reveal-scrim">
-            <span class="dnoise-reveal-btn">Reveal post anyway</span>
+        </article>
+
+        <!-- Post 3: Normal -->
+        <article class="x-post">
+          <img class="x-avatar" src="assets/avatar-3.jpg" alt="" />
+          <div class="x-body">
+            <div class="x-header">
+              <span class="x-name">Nora Lind</span>
+              <span class="x-handle">@noralind · 6h</span>
+            </div>
+            <p class="x-text">
+              Morning fog rolling over the harbor right before the 7am ferry docked. Autumn light really hits different
+              out here.
+            </p>
+            <div class="x-metrics" aria-hidden="true">
+              <span>&#128172; 9</span>
+              <span>&#8635; 2</span>
+              <span>&#9825; 147</span>
+              <span>&#128202; 1.9K</span>
+            </div>
           </div>
-        </div>
+        </article>
       </div>
     </section>
   </main>
 
+  <section class="logo-strip" aria-label="Powered by">
+    <p class="logo-strip-label">partners</p>
+    <div class="logo-marquee">
+      <div class="logo-track" id="logo-track"></div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-section" id="how-it-works" aria-label="How Dnoise works">
+    <h2 class="how-heading">How it works</h2>
+    <div class="how-grid" id="how-grid">
+      <div class="how-step how-step-1">
+        <h2 class="how-step-title">1. Scan Feed</h2>
+        <div class="how-box">
+          <div class="how-visual">
+            <div class="how-mini-row">
+              <span class="how-mini-dot"></span>
+              <span class="how-mini-mono">article[data-testid="tweet"]</span>
+            </div>
+            <div class="how-mini-lines">
+              <div class="how-mini-line how-mini-line-lg"></div>
+              <div class="how-mini-line how-mini-line-md"></div>
+            </div>
+            <div class="how-mini-tags">
+              <span>Text</span>
+              <span>@handle</span>
+              <span>Links</span>
+            </div>
+          </div>
+          <div class="how-body">
+            <h3>Real-time feed observation</h3>
+            <p>
+              As you scroll X, Dnoise watches for new posts entering your feed and extracts the text, author context, and external links on the fly.
+            </p>
+          </div>
+          <div class="how-meta">Zero layout shift &middot; Runs per post</div>
+        </div>
+      </div>
+
+      <div class="how-step how-step-2">
+        <h2 class="how-step-title">2. Analyze</h2>
+        <div class="how-box">
+          <div class="how-visual">
+            <div class="how-score-row">
+              <span class="how-score-label">PROPAGANDA</span>
+              <span class="how-score-val">86%</span>
+            </div>
+            <div class="how-score-bar">
+              <div class="how-score-fill" style="width: 86%"></div>
+            </div>
+            <div class="how-mini-tags">
+              <span>Rage-bait</span>
+              <span>False urgency</span>
+            </div>
+          </div>
+          <div class="how-body">
+            <h3>Fast manipulation check</h3>
+            <p>
+              Our classifier checks for coordinated talking points, emotional framing, and unverified claims—returning a confidence score and clear reasons.
+            </p>
+          </div>
+          <div class="how-meta">Sub-second check &middot; Fails safe</div>
+        </div>
+      </div>
+
+      <div class="how-step how-step-3">
+        <h2 class="how-step-title">3. Shield</h2>
+        <div class="how-box">
+          <div class="how-visual">
+            <div class="how-mini-shield-top">
+              <span class="dnoise-pill">86% Propaganda Likelihood</span>
+            </div>
+            <div class="how-mini-blur-strip">
+              <span class="how-mini-reveal">Reveal post anyway</span>
+            </div>
+          </div>
+          <div class="how-body">
+            <h3>You stay in control</h3>
+            <p>
+              High-risk posts are blurred in place before they grab your attention. Inspect why a post was flagged, reveal it anytime, or dismiss the warning.
+            </p>
+          </div>
+          <div class="how-meta">Transparent reasons &middot; 1-click reveal</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script>
-    const infoBtn = document.getElementById('preview-info-btn');
-    const details = document.getElementById('preview-details');
-    if (infoBtn && details) {
-      infoBtn.addEventListener('click', () => {
-        const isOpen = !details.hidden;
-        details.hidden = isOpen;
-        infoBtn.setAttribute('aria-expanded', String(!isOpen));
-        infoBtn.classList.toggle('is-open', !isOpen);
-      });
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
     }
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    window.scrollTo(0, 0);
+
+    const card = document.getElementById('demo-card');
+    const banner = document.getElementById('demo-banner');
+    const blurWrap = document.getElementById('demo-blur-wrap');
+    const scrim = document.getElementById('demo-reveal-scrim');
+    const revealBtn = document.getElementById('demo-reveal-btn');
+    const hideBtn = document.getElementById('demo-hide-btn');
+    const removeBtn = document.getElementById('demo-remove-btn');
+
+    const cardInfoBtn = document.getElementById('card-info-btn');
+    const cardDetails = document.getElementById('card-details');
+    const bannerInfoBtn = document.getElementById('banner-info-btn');
+    const bannerDetails = document.getElementById('banner-details');
+
+    function toggleDetails(btn, panel) {
+      const open = panel.hidden;
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      btn.classList.toggle('is-open', open);
+    }
+
+    cardInfoBtn?.addEventListener('click', () => toggleDetails(cardInfoBtn, cardDetails));
+    bannerInfoBtn?.addEventListener('click', () => toggleDetails(bannerInfoBtn, bannerDetails));
+
+    function revealPost() {
+      card.hidden = true;
+      banner.hidden = false;
+      blurWrap.classList.remove('is-shielded');
+      scrim.hidden = true;
+    }
+
+    function shieldPost() {
+      banner.hidden = true;
+      card.hidden = false;
+      blurWrap.classList.add('is-shielded');
+      scrim.hidden = false;
+    }
+
+    revealBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      revealPost();
+    });
+    scrim?.addEventListener('click', revealPost);
+    hideBtn?.addEventListener('click', shieldPost);
+    removeBtn?.addEventListener('click', () => {
+      banner.hidden = true;
+    });
+
+    // Trigger staggered reveal once when "How it works" cards are well into view
+    const howSection = document.getElementById('how-it-works');
+    const howGrid = document.getElementById('how-grid');
+    if (howSection && howGrid) {
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+              howSection.classList.add('is-visible');
+              observer.disconnect();
+            }
+          },
+          { threshold: 0.55 },
+        );
+        observer.observe(howGrid);
+      } else {
+        howSection.classList.add('is-visible');
+      }
+    }
+
+    // Auto-load technology logos from server/public/assets/logos/
+    const logoTrack = document.getElementById('logo-track');
+    async function loadLogos() {
+      if (!logoTrack) return;
+      try {
+        const res = await fetch('/api/logos');
+        const logos = await res.json();
+        if (!Array.isArray(logos) || logos.length === 0) return;
+
+        const buildSet = () => {
+          const frag = document.createDocumentFragment();
+          logos.forEach((logo) => {
+            const item = document.createElement('div');
+            item.className = 'logo-item';
+
+            const img = document.createElement('img');
+            img.className = 'logo-img';
+            img.src = logo.src;
+            img.alt = '';
+            img.loading = 'lazy';
+
+            const label = document.createElement('span');
+            label.className = 'logo-name';
+            label.textContent = logo.name;
+
+            item.append(img, label);
+            frag.appendChild(item);
+          });
+          return frag;
+        };
+
+        // Render two identical sets so translateX(-50%) loops seamlessly
+        logoTrack.append(buildSet(), buildSet());
+      } catch {
+        // Ignore if logo list fails to load
+      }
+    }
+    loadLogos();
   </script>
 </body>
 
