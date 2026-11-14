@@ -487,7 +487,7 @@ body {
   align-items: center;
   width: max-content;
   will-change: transform;
-  animation: logoScroll 48s linear infinite;
+  animation: logoScroll 104s linear infinite;
 }
 
 .logo-half {

@@ -489,7 +489,9 @@
           return half;
         };
 
-        // Render two identical halves so translateX(-50%) loops seamlessly
+        // Render two identical halves so translateX(-50%) loops seamlessly,
+        // scaling duration by repeatsPerHalf to keep the exact 26s-per-set speed.
+        logoTrack.style.animationDuration = `${repeatsPerHalf * 26}s`;
         logoTrack.replaceChildren(buildHalf(false), buildHalf(true));
       } catch {
         // Ignore if logo list fails to load
