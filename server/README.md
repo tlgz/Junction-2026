@@ -5,7 +5,7 @@ Classification backend for Dnoise. Runs on the Hostinger VPS (no GPU). Two steps
 1. **Detect** ([detector.js](detector.js)): the Dnoise propaganda classifier on a Verda GPU container
    ([../inference/](../inference/)) returns a propaganda score. It decides whether a post is flagged.
 2. **Explain** ([explain.js](explain.js)): only when a user clicks **See why** on a flagged post, an LLM on
-   Verda's inference API (`kimi-k3-1-pro` by default) explains why in 2 to 4 short reasons, using linked
+   Verda's inference API (`deepseek-4-1-flash-1017` by default) explains why in 2 to 4 short reasons, using linked
    pages scraped by Oxylabs as extra context. This keeps LLM usage to posts someone actually asks about.
 
 ```
@@ -40,7 +40,7 @@ To keep it running after logout, install `pd3k-backend.service` (instructions in
 | `VERDA_URL` | required. Verda deployment URL + `/api/classify`, e.g. `https://containers.datacrunch.io/dnoise/api/classify` |
 | `VERDA_API_KEY` | required. Verda inference API key (Verda console: Credentials -> Inference API Keys). Used by the detector and the explainer |
 | `PROPAGANDA_THRESHOLD` | `0.40`. Score at which a post is flagged and explained. Keep in sync with `HIDE_THRESHOLDS.PROPAGANDA` in `src/backend/detection/verdict.ts` |
-| `EXPLAINER_MODEL` | `kimi-k3-1-pro` (also available: `deepseek-4-1-flash-1017`) |
+| `EXPLAINER_MODEL` | `deepseek-4-1-flash-1017` (~1 s). Also available: `kimi-k3-1-pro` (reasoning, ~8 s) |
 | `EXPLAINER_URL` | `https://inference.verda.com/v1` (any OpenAI-compatible API) |
 | `EXPLAINER_API_KEY` | defaults to `VERDA_API_KEY` |
 | `PORT` | `3000` |

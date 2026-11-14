@@ -9,7 +9,7 @@ const MAX_REASONS = 4;
 
 // Read lazily: server.js loads .env after imports are evaluated.
 // List models: curl https://inference.verda.com/v1/models -H "Authorization: Bearer $VERDA_API_KEY"
-export const explainerModel = () => process.env.EXPLAINER_MODEL || 'kimi-k3-1-pro';
+export const explainerModel = () => process.env.EXPLAINER_MODEL || 'deepseek-4-1-flash-1017';
 const apiKey = () => process.env.EXPLAINER_API_KEY || process.env.VERDA_API_KEY;
 export const explainerConfigured = () => Boolean(apiKey());
 
@@ -73,7 +73,7 @@ export async function explainPropaganda(text, metadata, score, scraped = []) {
     ],
     response_format: { type: 'json_object' },
     temperature: 0.2,
-    max_tokens: 1000, // reasoning models spend most of this thinking; the answer itself is short
+    max_tokens: 1000, // the answer is short; headroom for reasoning models like kimi-k3-1-pro
   });
   return parseReasons(response.choices[0]?.message?.content);
 }
