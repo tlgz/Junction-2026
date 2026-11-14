@@ -1,7 +1,7 @@
 // Dnoise backend. Runs on the Hostinger VPS. For each post:
 //   1. detector.js: the Dnoise classifier on Verda decides IF it is propaganda,
-//   2. explain.js:  only for flagged posts, an LLM on Verda's inference API explains WHY
-//                   (with scraped link pages as extra context).
+//   2. explain.js:  only when a user clicks "See why" (POST /api/explain), an LLM on
+//                   Verda's inference API explains WHY (with scraped link pages as context).
 // Returns predictions in the shape the extension's API client expects:
 //   { predictions: [{ category, confidence, reasons }] }
 
@@ -131,46 +131,79 @@ app.get('/', (_req, res) => {
 
 app.use(express.static(publicDir, { etag: !isDev, lastModified: !isDev, maxAge: isDev ? 0 : '1h' }));
 
-app.post('/api/classify', async (req, res) => {
+/** Validates the shared { text, metadata } body. Returns null after sending a 400. */
+function readPost(req, res) {
   const { text } = req.body ?? {};
   // Default params only cover undefined; a null or non-object metadata would throw later.
   const metadata = req.body?.metadata && typeof req.body.metadata === 'object' ? req.body.metadata : {};
   if (typeof text !== 'string' || !text.trim()) {
-    return res.status(400).json({ error: 'Missing text' });
+    res.status(400).json({ error: 'Missing text' });
+    return null;
   }
-  if (!detectorConfigured()) {
-    return res.json({ predictions: [] });
-  }
+  return { text, metadata };
+}
+
+// Step 1, every post: the classifier decides. No LLM call here, so it is cheap.
+app.post('/api/classify', async (req, res) => {
+  const post = readPost(req, res);
+  if (!post) return;
+  if (!detectorConfigured()) return res.json({ predictions: [] });
 
   const started = Date.now();
-  let score;
   try {
-    score = await detectPropaganda(text, metadata);
+    const score = await detectPropaganda(post.text, post.metadata);
+    if (score === null) {
+      console.log(`no prediction in ${Date.now() - started}ms (unsupported language)`);
+      return res.json({ predictions: [] });
+    }
+    console.log(`classified in ${Date.now() - started}ms -> propaganda ${score.toFixed(2)}`);
+    return res.json({ predictions: [{ category: 'PROPAGANDA', confidence: score, reasons: [] }] });
   } catch (err) {
     console.error(`Detector error after ${Date.now() - started}ms:`, err?.message || err);
     // Never crash the extension on error: an empty list means "don't hide".
     return res.json({ predictions: [] });
   }
-  if (score === null) {
-    console.log(`no prediction in ${Date.now() - started}ms (unsupported language)`);
-    return res.json({ predictions: [] });
+});
+
+// Step 2, only when a user clicks "See why": the LLM explains. Results are
+// cached, so a viral post costs one LLM call no matter how many users open it.
+const EXPLAIN_CACHE_LIMIT = 500;
+const explanations = new Map(); // key -> Promise<string[]>
+
+async function explainUncached({ text, metadata }) {
+  // Re-check with the classifier so this endpoint can't be used as a free LLM proxy.
+  const score = await detectPropaganda(text, metadata);
+  if (score === null || score < propagandaThreshold()) return [];
+  const scraped = await scrapeLinks(metadata);
+  return explainPropaganda(text, metadata, score, scraped);
+}
+
+app.post('/api/explain', async (req, res) => {
+  const post = readPost(req, res);
+  if (!post) return;
+  if (!detectorConfigured() || !explainerConfigured()) {
+    return res.status(503).json({ error: 'Explainer not configured' });
   }
 
-  const threshold = propagandaThreshold();
-  let reasons = [];
-  if (score >= threshold) {
-    try {
-      const scraped = await scrapeLinks(metadata);
-      reasons = await explainPropaganda(text, metadata, score, scraped);
-    } catch (err) {
-      // The verdict stands without an explanation.
-      console.error('Explainer error:', err?.message || err);
-    }
-    if (!reasons.length) reasons = [`Propaganda classifier score ${score.toFixed(2)} (threshold ${threshold.toFixed(2)})`];
+  const key = JSON.stringify([post.text, post.metadata.quotedText ?? null, post.metadata.card ?? null]);
+  let pending = explanations.get(key);
+  const cached = Boolean(pending);
+  if (!pending) {
+    pending = explainUncached(post);
+    explanations.set(key, pending);
+    pending.catch(() => explanations.delete(key)); // never cache failures
+    if (explanations.size > EXPLAIN_CACHE_LIMIT) explanations.delete(explanations.keys().next().value);
   }
 
-  console.log(`classified in ${Date.now() - started}ms -> propaganda ${score.toFixed(2)}${score >= threshold ? ' (explained)' : ''}`);
-  return res.json({ predictions: [{ category: 'PROPAGANDA', confidence: score, reasons }] });
+  const started = Date.now();
+  try {
+    const reasons = await pending;
+    console.log(`explained in ${Date.now() - started}ms${cached ? ' (cached)' : ''} -> ${reasons.length} reasons`);
+    return res.json({ reasons });
+  } catch (err) {
+    console.error(`Explainer error after ${Date.now() - started}ms:`, err?.message || err);
+    return res.status(502).json({ error: 'Explanation failed' });
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () =>

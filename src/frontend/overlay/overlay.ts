@@ -5,6 +5,7 @@ import type { OverlayTarget, Verdict } from "../../shared/types";
 import { el, swallow } from "../dom";
 import { createRevealedBanner } from "./banner";
 import { createInterceptionCard } from "./card";
+import type { ReasonsLoader } from "./details";
 import { getLikelihood } from "./likelihood";
 import "./overlay.css";
 
@@ -14,7 +15,11 @@ function pauseMedia(root: HTMLElement): void {
   });
 }
 
-export function mountOverlay(target: OverlayTarget, verdict: Verdict): void {
+export function mountOverlay(
+  target: OverlayTarget,
+  verdict: Verdict,
+  loadReasons?: ReasonsLoader,
+): void {
   if (target.container.dataset.pd3kMounted) return;
   target.container.dataset.pd3kMounted = "1";
 
@@ -58,11 +63,12 @@ export function mountOverlay(target: OverlayTarget, verdict: Verdict): void {
     }
   };
 
-  const card = createInterceptionCard({ likelihood, verdict });
+  const card = createInterceptionCard({ likelihood, verdict, loadReasons });
 
   const banner = createRevealedBanner({
     likelihood,
     verdict,
+    loadReasons,
     onHide: () => {
       banner.remove();
       shield();

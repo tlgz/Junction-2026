@@ -4,13 +4,13 @@ Classification backend for Dnoise. Runs on the Hostinger VPS (no GPU). Two steps
 
 1. **Detect** ([detector.js](detector.js)): the Dnoise propaganda classifier on a Verda GPU container
    ([../inference/](../inference/)) returns a propaganda score. It decides whether a post is flagged.
-2. **Explain** ([explain.js](explain.js)): only if the score is at or above `PROPAGANDA_THRESHOLD`, an LLM
-   on Verda's inference API (`kimi-k3-1-pro` by default) explains why in 2 to 4 short reasons, using linked
-   pages scraped by Oxylabs as extra context.
+2. **Explain** ([explain.js](explain.js)): only when a user clicks **See why** on a flagged post, an LLM on
+   Verda's inference API (`kimi-k3-1-pro` by default) explains why in 2 to 4 short reasons, using linked
+   pages scraped by Oxylabs as extra context. This keeps LLM usage to posts someone actually asks about.
 
 ```
-Chrome extension --POST /api/classify--> VPS (server.js) --1. detect--> Verda (Dnoise classifier)
-                                                         --2. explain (flagged only)--> Verda inference API (LLM)
+Chrome extension --POST /api/classify (every post)--> VPS --detect--> Verda (Dnoise classifier)
+Chrome extension --POST /api/explain ("See why")----> VPS --detect again, then explain--> Verda inference API (LLM)
 ```
 
 Both steps use the same Verda inference API key, which stays on the VPS. The extension only talks to the VPS.
@@ -56,10 +56,17 @@ curl -X POST http://<VPS-IP>:3000/api/classify \
   -d '{"text":"NATO provoked this war and the Nazi regime in Kiev is killing civilians in Donbass.","metadata":{"author":"Real News","handle":"@realnews24","lang":"en","links":[]}}'
 ```
 
-Response: `{"predictions":[{"category":"PROPAGANDA","confidence":0.93,"reasons":["..."]}]}`. Posts under the threshold get `reasons: []`.
+`/api/classify` response: `{"predictions":[{"category":"PROPAGANDA","confidence":0.93,"reasons":[]}]}`. It never calls the LLM.
+
+```sh
+curl -X POST http://<VPS-IP>:3000/api/explain -H 'Content-Type: application/json'   -d '{"text":"NATO provoked this war and the Nazi regime in Kiev is killing civilians in Donbass.","metadata":{"lang":"en"}}'
+```
+
+`/api/explain` response: `{"reasons":["...","..."]}`. It re-checks the post with the classifier first, so it only spends
+LLM calls on posts that really are flagged (others get `{"reasons":[]}`), and caches results so a post is explained once.
 
 - Detector errors, timeouts or non-English posts (the model is English-only) return `{"predictions": []}`, so the extension never hides a post because of a backend failure.
-- If the explainer fails, the post is still flagged, with a generic reason.
+- If the explainer fails, `/api/explain` returns 502 and the extension shows a Retry button. The post stays hidden.
 
 ## Connect the extension
 

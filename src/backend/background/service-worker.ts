@@ -4,11 +4,13 @@
 
 import {
   isAnalyzeMessage,
+  isExplainMessage,
   isFlaggedMessage,
   type AnalyzeResponse,
+  type ExplainResponse,
 } from "../../shared/messages";
 import type { PostData, Verdict } from "../../shared/types";
-import { classify } from "../api/client";
+import { classify, explain } from "../api/client";
 import { loadConfig } from "../api/config";
 import { mockPredict } from "../detection/mock";
 import { isTrivial } from "../detection/prefilter";
@@ -49,9 +51,11 @@ async function analyze(post: PostData): Promise<Verdict> {
   return buildVerdict(predictions);
 }
 
+// Same text with a different card/quote/link is a different post.
+const postKey = (post: PostData) => JSON.stringify([post.text, post.quotedText, post.card, post.links]);
+
 function analyzeCached(post: PostData): Promise<Verdict> {
-  // Same text with a different card/quote/link is a different post.
-  const key = JSON.stringify([post.text, post.quotedText, post.card, post.links]);
+  const key = postKey(post);
   const hit = cache.get(key);
   if (hit) {
     console.debug(`[pd3k:worker] Cache hit for ${post.handle || "post"}`);
@@ -63,6 +67,28 @@ function analyzeCached(post: PostData): Promise<Verdict> {
   pending.catch(() => cache.delete(key)); // never cache failures
 
   if (cache.size > CACHE_LIMIT) cache.delete(cache.keys().next().value as string);
+  return pending;
+}
+
+/** Explanations cost an LLM call, so they are fetched only on "See why" and cached. */
+const explanations = new Map<string, Promise<string[]>>();
+
+async function explainPost(post: PostData): Promise<string[]> {
+  const config = await loadConfig();
+  if (!config.apiUrl) return (await mockPredict(post))[0]?.reasons ?? [];
+  return explain(post, config);
+}
+
+function explainCached(post: PostData): Promise<string[]> {
+  const key = postKey(post);
+  const hit = explanations.get(key);
+  if (hit) return hit;
+
+  const pending = explainPost(post);
+  explanations.set(key, pending);
+  pending.catch(() => explanations.delete(key)); // never cache failures
+
+  if (explanations.size > CACHE_LIMIT) explanations.delete(explanations.keys().next().value as string);
   return pending;
 }
 
@@ -85,6 +111,16 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, sendResponse) =>
   if (isFlaggedMessage(message)) {
     if (sender.tab?.id !== undefined) countHidden(sender.tab.id);
     return false;
+  }
+  if (isExplainMessage(message)) {
+    explainCached(message.post).then(
+      (reasons): void => sendResponse({ ok: true, reasons } satisfies ExplainResponse),
+      (error: unknown): void => {
+        console.warn("[pd3k:worker] Explain failed:", error);
+        sendResponse({ ok: false, error: String(error) } satisfies ExplainResponse);
+      },
+    );
+    return true;
   }
   if (!isAnalyzeMessage(message)) return false;
 

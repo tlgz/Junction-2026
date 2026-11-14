@@ -8,7 +8,7 @@ import type { FlaggedMessage } from "../../shared/messages";
 import { isActiveOn, loadSettings, type Settings } from "../../shared/settings";
 import type { PlatformAdapter } from "../../shared/types";
 import { getPlatform } from "../platforms";
-import { analyze } from "./analyze";
+import { analyze, explain } from "./analyze";
 import { observePage } from "./observer";
 
 /** Hard cap on API calls per page load, so endless pages can't run up costs. */
@@ -34,8 +34,16 @@ async function handle(platform: PlatformAdapter, element: HTMLElement): Promise<
     "color: #ff4d4d; font-weight: bold;",
     verdict.labels,
   );
-  if (platform.getOverlayTarget) mountOverlay(platform.getOverlayTarget(element), verdict);
-  else mountShield(element, verdict);
+  // Reasons cost an LLM call: fetched only when the user opens "See why", shared
+  // by the card and the revealed banner, and retried after a failure.
+  let reasons: Promise<string[]> | null = null;
+  const loadReasons = () =>
+    (reasons ??= explain(post).catch((error: unknown) => {
+      reasons = null;
+      throw error;
+    }));
+  if (platform.getOverlayTarget) mountOverlay(platform.getOverlayTarget(element), verdict, loadReasons);
+  else mountShield(element, verdict, loadReasons);
   const flagged: FlaggedMessage = { type: "pd3k:flagged" };
   void chrome.runtime.sendMessage(flagged).catch(() => {});
 }

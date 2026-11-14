@@ -6,6 +6,7 @@ import type { Verdict } from "../../shared/types";
 import { el } from "../dom";
 import { createRevealedBanner } from "./banner";
 import { createInterceptionCard } from "./card";
+import type { ReasonsLoader } from "./details";
 import { getLikelihood } from "./likelihood";
 import "./overlay.css";
 
@@ -18,7 +19,11 @@ function slot(target: HTMLElement): HTMLElement {
   return el("div", "pd3k-slot");
 }
 
-export function mountShield(target: HTMLElement, verdict: Verdict): void {
+export function mountShield(
+  target: HTMLElement,
+  verdict: Verdict,
+  loadReasons?: ReasonsLoader,
+): void {
   if (target.dataset.pd3kMounted) return;
   target.dataset.pd3kMounted = "1";
 
@@ -36,10 +41,11 @@ export function mountShield(target: HTMLElement, verdict: Verdict): void {
     holder.replaceChildren(banner);
   };
 
-  const card = createInterceptionCard({ likelihood, verdict, onReveal: reveal });
+  const card = createInterceptionCard({ likelihood, verdict, loadReasons, onReveal: reveal });
   const banner = createRevealedBanner({
     likelihood,
     verdict,
+    loadReasons,
     onHide: shield,
     onRemove: () => holder.remove(),
   });

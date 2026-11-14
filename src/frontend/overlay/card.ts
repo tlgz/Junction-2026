@@ -3,12 +3,13 @@
 import type { Verdict } from "../../shared/types";
 import { el, swallow } from "../dom";
 import { createLogoSvg } from "../logo";
-import { createInfoSection } from "./details";
+import { createInfoSection, type ReasonsLoader } from "./details";
 import { primaryLabel, summaryText } from "./likelihood";
 
 export interface CardOptions {
   likelihood: number;
   verdict: Verdict;
+  loadReasons?: ReasonsLoader;
   /** Adds a "Show anyway" button; used where there is no blurred preview to click. */
   onReveal?: () => void;
 }
@@ -16,6 +17,7 @@ export interface CardOptions {
 export function createInterceptionCard({
   likelihood,
   verdict,
+  loadReasons,
   onReveal,
 }: CardOptions): HTMLElement {
   const pill = el(
@@ -31,7 +33,7 @@ export function createInterceptionCard({
   );
   const metaRow = el("div", "pd3k-meta-row", pill, brand);
   const summary = el("p", "pd3k-summary", summaryText(verdict));
-  const info = createInfoSection(verdict);
+  const info = createInfoSection(verdict, loadReasons);
 
   info.btn.addEventListener("click", (e) => {
     swallow(e);

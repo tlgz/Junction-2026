@@ -67,3 +67,32 @@ export async function classify(post: PostData, config: ApiConfig): Promise<Predi
   if (!response.ok) throw new Error(`Classification API returned ${response.status}`);
   return toPredictions(await response.json());
 }
+
+/** The explain endpoint lives next to the classify endpoint: .../classify -> .../explain. */
+export function explainUrl(apiUrl: string): string {
+  const url = new URL(apiUrl);
+  url.pathname = url.pathname.replace(/\/classify\/?$/, "/explain");
+  return url.toString();
+}
+
+/** Validates untrusted explain output: a short list of plain strings. */
+export function toReasons(body: unknown): string[] {
+  const list = (body as { reasons?: unknown } | null)?.reasons;
+  if (!Array.isArray(list)) throw new Error("Malformed API response: no reasons array");
+  return list.map((r) => String(r).trim()).filter(Boolean).slice(0, 6);
+}
+
+/** Asks the server WHY a flagged post was flagged. Only called on user request. */
+export async function explain(post: PostData, config: ApiConfig): Promise<string[]> {
+  const response = await fetch(explainUrl(config.apiUrl), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(config.apiKey && { Authorization: `Bearer ${config.apiKey}` }),
+    },
+    body: JSON.stringify(toRequest(post)),
+    signal: AbortSignal.timeout(config.explainTimeoutMs),
+  });
+  if (!response.ok) throw new Error(`Explain API returned ${response.status}`);
+  return toReasons(await response.json());
+}

@@ -2,12 +2,13 @@
 
 import type { Verdict } from "../../shared/types";
 import { el, swallow } from "../dom";
-import { createInfoSection } from "./details";
+import { createInfoSection, type ReasonsLoader } from "./details";
 import { primaryLabel } from "./likelihood";
 
 export interface RevealedBannerOptions {
   likelihood: number;
   verdict: Verdict;
+  loadReasons?: ReasonsLoader;
   onHide: () => void;
   onRemove: () => void;
 }
@@ -15,6 +16,7 @@ export interface RevealedBannerOptions {
 export function createRevealedBanner({
   likelihood,
   verdict,
+  loadReasons,
   onHide,
   onRemove,
 }: RevealedBannerOptions): HTMLElement {
@@ -23,7 +25,7 @@ export function createRevealedBanner({
     "pd3k-revealed-text",
     `${likelihood}% ${primaryLabel(verdict)} Likelihood`,
   );
-  const info = createInfoSection(verdict);
+  const info = createInfoSection(verdict, loadReasons);
   info.btn.classList.add("pd3k-info-btn-compact");
   info.details.classList.add("pd3k-details-revealed");
 

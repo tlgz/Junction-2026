@@ -9,11 +9,18 @@ export interface ApiConfig {
   apiUrl: string;
   apiKey: string;
   timeoutMs: number;
+  /** "See why" waits for an LLM behind a spinner, so it gets longer than classify. */
+  explainTimeoutMs: number;
 }
 
 const DEFAULT_API_URL = "https://dnoise.tech/api/classify";
 
-const DEFAULTS: ApiConfig = { apiUrl: DEFAULT_API_URL, apiKey: "", timeoutMs: 15_000 };
+const DEFAULTS: ApiConfig = {
+  apiUrl: DEFAULT_API_URL,
+  apiKey: "",
+  timeoutMs: 15_000,
+  explainTimeoutMs: 30_000,
+};
 
 export async function loadConfig(): Promise<ApiConfig> {
   const stored = await chrome.storage.local.get(Object.keys(DEFAULTS));

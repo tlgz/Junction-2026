@@ -1,6 +1,6 @@
-// Explainer: once the detector (Verda classifier) has flagged a post, asks an
-// LLM on Verda's inference API (OpenAI-compatible) to say WHY in a few short
-// reasons. It never decides whether a post is propaganda; that is the detector's job.
+// Explainer: when a user clicks "See why" on a flagged post, asks an LLM on
+// Verda's inference API (OpenAI-compatible) to say WHY in a few short reasons.
+// It never decides whether a post is propaganda; that is the detector's job.
 
 import OpenAI from 'openai';
 
@@ -18,7 +18,7 @@ function getClient() {
   client ??= new OpenAI({
     baseURL: process.env.EXPLAINER_URL || 'https://inference.verda.com/v1',
     apiKey: apiKey(),
-    timeout: 7_000, // detector + scraping + explainer must fit the extension's 15s timeout
+    timeout: 20_000, // runs on demand behind a spinner; keep under the extension's explain timeout
     maxRetries: 0,
   });
   return client;

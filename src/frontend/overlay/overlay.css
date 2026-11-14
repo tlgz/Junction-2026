@@ -261,6 +261,56 @@
   margin-bottom: 0;
 }
 
+/* "See why" loading / error state (reasons are fetched on demand) */
+.pd3k-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--pd3k-muted);
+  line-height: 1.45;
+}
+
+.pd3k-spinner {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--pd3k-border-subtle);
+  border-top-color: var(--pd3k-red);
+  border-radius: 50%;
+  animation: pd3k-spin 0.8s linear infinite;
+}
+
+@keyframes pd3k-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pd3k-spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+.pd3k-retry-btn {
+  flex-shrink: 0;
+  background: var(--pd3k-surface-2);
+  border: 1px solid var(--pd3k-border);
+  border-radius: 9999px;
+  padding: 2px 10px;
+  color: var(--pd3k-text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pd3k-retry-btn:hover {
+  border-color: var(--pd3k-border-subtle);
+}
+
 /* ── Revealed Warning Banner ────────────────────────────────────────────── */
 
 .pd3k-revealed-wrap {
