@@ -32,6 +32,8 @@ To keep it running after logout, install `pd3k-backend.service` (instructions in
 | `HOSTINGER_AI_ROUTER_URL` | `https://router.hostinger.com/v1` |
 | `MODEL` | `gpt-4.1-mini` (also good: `gemini-3.5-flash-lite-eu`, `deepseek-v4.1-flash`; full list: `curl https://router.hostinger.com/v1/models`) |
 | `PORT` | `3000` |
+| `OXYLABS_API_KEY` | optional. Oxylabs AI Studio key: links in flagged content are scraped (AI-Scraper, markdown) and shown to the classifier |
+| `SCRAPE_BUDGET_MS` | `4000` (max time spent scraping per request) |
 
 ## Test
 
