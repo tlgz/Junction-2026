@@ -11,15 +11,22 @@ export interface ApiConfig {
   timeoutMs: number;
 }
 
-const DEFAULT_API_URL = "http://179.67.199.148:3000/api/classify";
+const DEFAULT_API_URL = "https://dnoise.tech/api/classify";
 
 const DEFAULTS: ApiConfig = { apiUrl: DEFAULT_API_URL, apiKey: "", timeoutMs: 10_000 };
 
 export async function loadConfig(): Promise<ApiConfig> {
   const stored = await chrome.storage.local.get(Object.keys(DEFAULTS));
-  const apiUrl =
+  let apiUrl =
     typeof stored.apiUrl === "string" && stored.apiUrl.trim()
       ? stored.apiUrl.trim()
       : DEFAULT_API_URL;
+
+  // Upgrade legacy insecure HTTP IP endpoint to production HTTPS domain
+  if (apiUrl.includes("179.67.199.148:3000")) {
+    apiUrl = DEFAULT_API_URL;
+    void chrome.storage.local.set({ apiUrl: DEFAULT_API_URL });
+  }
+
   return { ...DEFAULTS, ...stored, apiUrl };
 }

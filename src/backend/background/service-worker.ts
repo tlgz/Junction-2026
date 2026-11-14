@@ -10,21 +10,26 @@ import type { PostData, Verdict } from "../../shared/types";
 import { classify } from "../api/client";
 import { loadConfig } from "../api/config";
 import { mockPredict } from "../detection/mock";
+import { isTrivial } from "../detection/prefilter";
 import { buildVerdict } from "../detection/verdict";
 
 const CACHE_LIMIT = 500;
-/** In-flight and finished analyses by post text, so identical posts cost one call. */
+/** In-flight and finished analyses by post content, so identical posts cost one call. */
 const cache = new Map<string, Promise<Verdict>>();
 
 async function analyze(post: PostData): Promise<Verdict> {
+  if (isTrivial(post)) return buildVerdict([]);
   const config = await loadConfig();
   console.log(`[pd3k:worker] Analyzing ${post.handle || "post"} via ${config.apiUrl || "mock"}`);
+  // Errors propagate: they are not cached, and the content script treats a
+  // failed analysis as "don't hide".
   const predictions = config.apiUrl ? await classify(post, config) : await mockPredict(post);
   return buildVerdict(predictions);
 }
 
 function analyzeCached(post: PostData): Promise<Verdict> {
-  const key = post.text;
+  // Same text with a different card/quote/link is a different post.
+  const key = JSON.stringify([post.text, post.quotedText, post.card, post.links]);
   const hit = cache.get(key);
   if (hit) {
     console.debug(`[pd3k:worker] Cache hit for ${post.handle || "post"}`);
@@ -48,7 +53,7 @@ chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) =
       sendResponse({ ok: true, verdict } satisfies AnalyzeResponse);
     },
     (error: unknown): void => {
-      console.error(`[pd3k:worker] Failed for ${message.post.handle || "post"}:`, error);
+      console.warn(`[pd3k:worker] Failed for ${message.post.handle || "post"}:`, error);
       sendResponse({ ok: false, error: String(error) } satisfies AnalyzeResponse);
     },
   );

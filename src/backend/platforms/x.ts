@@ -8,7 +8,20 @@ const SEL = {
   author: '[data-testid="User-Name"]',
   permalink: 'a[href*="/status/"]:has(time)',
   photo: '[data-testid="tweetPhoto"] img',
+  /** Embedded clickable block (like a quote tweet or card). */
+  quote: 'div[role="link"]',
+  card: '[data-testid="card.wrapper"]',
 } as const;
+
+const MAX_CARD_CHARS = 500;
+
+/** First match of `selector` in `post` that is not inside `exclude`. */
+function firstOutside<T extends Element>(post: HTMLElement, selector: string, exclude: Element | null): T | null {
+  for (const el of post.querySelectorAll<T>(selector)) {
+    if (!exclude || !exclude.contains(el)) return el;
+  }
+  return null;
+}
 
 /** Mentions, hashtags and other x.com links are not external links. */
 function isInternalLink(href: string): boolean {
@@ -36,13 +49,22 @@ export const xAdapter: PlatformAdapter = {
   postSelector: SEL.post,
 
   extractPost(post) {
-    const textEl = post.querySelector<HTMLElement>(SEL.text);
-    const authorText = post.querySelector<HTMLElement>(SEL.author)?.innerText ?? "";
+    const ownAuthor = post.querySelector<HTMLElement>(SEL.author);
+    // Quoted tweet is a link container that has its own author row, distinct from the post's author.
+    const quoteEl = ownAuthor
+      ? [...post.querySelectorAll<HTMLElement>(SEL.quote)].find(
+          (q) => q.querySelector(SEL.author) && !q.contains(ownAuthor),
+        ) ?? null
+      : null;
+
+    const textEl = firstOutside<HTMLElement>(post, SEL.text, quoteEl);
+    const cardEl = firstOutside<HTMLElement>(post, SEL.card, quoteEl);
+    const authorText = ownAuthor?.innerText ?? "";
     const permalink = post.querySelector<HTMLAnchorElement>(SEL.permalink)?.href ?? null;
 
     return {
       id: permalink?.match(/\/status\/(\d+)/)?.[1] ?? null,
-      text: textEl?.innerText.trim() ?? "",
+      text: textEl?.innerText?.trim() ?? "",
       author: authorText.split("\n")[0]?.trim() ?? "",
       handle: authorText.match(/@\w+/)?.[0] ?? "",
       url: permalink,
@@ -53,6 +75,8 @@ export const xAdapter: PlatformAdapter = {
         .map((img) => img.alt.trim())
         .filter(Boolean),
       lang: textEl?.lang || null,
+      quotedText: quoteEl?.querySelector<HTMLElement>(SEL.text)?.innerText?.trim() || null,
+      card: cardEl?.innerText?.replace(/\s+/g, " ")?.trim()?.slice(0, MAX_CARD_CHARS) || null,
     };
   },
 

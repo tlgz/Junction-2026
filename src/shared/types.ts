@@ -21,6 +21,10 @@ export interface PostData {
   mediaAlt: string[];
   /** BCP-47 language tag reported by the platform. */
   lang: string | null;
+  /** Text of an embedded quoted tweet, if this post quotes one. */
+  quotedText: string | null;
+  /** Visible text of a link preview card (domain, headline, description). */
+  card: string | null;
 }
 
 export interface Prediction {

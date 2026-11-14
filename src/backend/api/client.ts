@@ -15,6 +15,8 @@ interface ApiRequest {
     lang: string | null;
     links: string[];
     mediaAlt: string[];
+    quotedText: string | null;
+    card: string | null;
   };
 }
 
@@ -24,8 +26,8 @@ interface ApiResponse {
 }
 
 export function toRequest(post: PostData): ApiRequest {
-  const { text, author, handle, url, lang, links, mediaAlt } = post;
-  return { text, metadata: { author, handle, url, lang, links, mediaAlt } };
+  const { text, author, handle, url, lang, links, mediaAlt, quotedText, card } = post;
+  return { text, metadata: { author, handle, url, lang, links, mediaAlt, quotedText, card } };
 }
 
 const isCategory = (value: string): value is Category =>

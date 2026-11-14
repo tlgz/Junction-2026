@@ -15,7 +15,7 @@ if (platform) {
 
     const verdict = await analyze(post);
     if (!verdict) {
-      console.warn(`[pd3k] No verdict returned for ${post.handle || "post"}`);
+      console.debug(`[pd3k] No verdict returned for ${post.handle || "post"}`);
       return;
     }
 
