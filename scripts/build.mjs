@@ -36,7 +36,9 @@ const options = {
 
 await rm(outdir, { recursive: true, force: true });
 await mkdir(`${outdir}/popup`, { recursive: true });
+await mkdir(`${outdir}/icons`, { recursive: true });
 await copyStatic();
+await cp("src/icons", `${outdir}/icons`, { recursive: true });
 
 if (watch) {
   const ctx = await esbuild.context(options);
