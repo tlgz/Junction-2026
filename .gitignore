@@ -3,3 +3,7 @@ dist/
 .env
 .env.*
 !.env.example
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+

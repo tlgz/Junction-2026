@@ -1,126 +1,256 @@
-/* In-page overlay for flagged posts. All classes are prefixed pd3k- to avoid
-   clashing with host page styles. */
+/* In-page CivicGuard overlay for flagged posts. All classes are prefixed pd3k-. */
 
 .pd3k-flagged {
-  --pd3k-red: #e00000;
   position: relative !important;
-  outline: 2px solid var(--pd3k-red) !important;
+  outline: 1px solid #44301f !important;
   outline-offset: 2px;
-  border-radius: 12px;
-  min-height: 96px;
+  border-radius: 14px;
+  margin-bottom: 12px !important;
 }
 
-.pd3k-flagged.pd3k-expanded {
-  min-height: 260px;
+.pd3k-flagged.pd3k-shielded {
+  min-height: 230px !important;
 }
+
+.pd3k-flagged.pd3k-shielded.pd3k-expanded {
+  min-height: 305px !important;
+}
+
+/* ── Shielded Blur Overlay ──────────────────────────────────────────────── */
 
 .pd3k-overlay {
   position: absolute;
   inset: 0;
   z-index: 10;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow-y: auto;
-  padding: 8px;
-  border-radius: inherit;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  background: rgba(255, 255, 255, 0.15);
-  cursor: default;
-  font-family: system-ui, sans-serif;
-}
-
-.pd3k-panel {
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  max-height: 100%;
+  justify-content: space-between;
+  border-radius: inherit;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(17, 19, 23, 0.72);
+  cursor: default;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+  color: #e5e7eb;
+  overflow-y: auto;
 }
 
-.pd3k-labels {
+.pd3k-card {
+  background: #16181c;
+  border-bottom: 1px solid #262930;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+.pd3k-meta-row {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.pd3k-label {
-  padding: 3px 10px;
-  border: 2px solid var(--pd3k-red);
-  border-radius: 6px;
-  background: #fff;
-  color: var(--pd3k-red);
-  font: 800 15px/1.2 system-ui, sans-serif;
-  letter-spacing: 1px;
+.pd3k-likelihood-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #2f2217;
+  border: 1px solid #44301f;
+  color: #f3c69f;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.pd3k-likelihood-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f3a661;
+  flex-shrink: 0;
+}
+
+.pd3k-brand-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.pd3k-summary {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e5e7eb;
+  line-height: 1.4;
 }
 
 .pd3k-actions {
   display: flex;
-  gap: 8px;
-}
-
-.pd3k-btn {
-  padding: 6px 14px;
-  border: 2px solid var(--pd3k-red);
-  border-radius: 999px;
-  background: #fff;
-  color: var(--pd3k-red);
-  font: 700 13px/1 system-ui, sans-serif;
-  cursor: pointer;
-}
-
-.pd3k-btn:hover,
-.pd3k-btn-primary {
-  background: var(--pd3k-red);
-  color: #fff;
-}
-
-.pd3k-btn-primary:hover {
-  background: #b00000;
-}
-
-.pd3k-details {
-  width: min(320px, 100%);
-  margin: 0;
-  padding: 10px 12px;
-  list-style: none;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #111;
-  font-size: 13px;
-  text-align: left;
-}
-
-.pd3k-prediction + .pd3k-prediction {
+  align-items: center;
   margin-top: 10px;
 }
 
-.pd3k-prediction-head {
-  display: flex;
+.pd3k-info-btn {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-  font-weight: 800;
+  background: #2c2017;
+  border: 1px solid #3f2d1d;
+  border-radius: 8px;
+  padding: 6px 11px;
+  color: #f3c69f;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.pd3k-score,
-.pd3k-category {
-  color: var(--pd3k-red);
+.pd3k-info-btn:hover {
+  background: #38281c;
+  border-color: #543b25;
 }
 
-.pd3k-bar {
-  height: 4px;
-  margin: 4px 0;
-  border-radius: 2px;
-  background: linear-gradient(
-    to right,
-    var(--pd3k-red) var(--pd3k-value),
-    #ddd var(--pd3k-value)
-  );
+.pd3k-info-btn-compact {
+  padding: 4px 9px;
+  font-size: 11.5px;
+  border-radius: 7px;
 }
 
-.pd3k-reasons {
+.pd3k-chevron {
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.pd3k-chevron-open {
+  transform: rotate(180deg);
+}
+
+.pd3k-details {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #111317;
+  border: 1px solid #262930;
+  border-radius: 8px;
+}
+
+.pd3k-details-text {
   margin: 0;
-  padding-left: 18px;
-  color: #444;
+  font-size: 12.5px;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.pd3k-reveal-area {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 14px;
+  min-height: 58px;
+}
+
+.pd3k-reveal-btn {
+  background: rgba(22, 24, 28, 0.92);
+  border: 1px solid #3f2d1d;
+  border-radius: 8px;
+  padding: 7px 14px;
+  color: #f3c69f;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pd3k-reveal-btn:hover {
+  background: #2c2017;
+  border-color: #5a3f29;
+  color: #fde3cb;
+}
+
+/* ── Revealed Connected Warning Banner ──────────────────────────────────── */
+
+.pd3k-revealed-wrap {
+  margin-bottom: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #44301f;
+  background: #141210;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+  color: #e5e7eb;
+}
+
+.pd3k-revealed-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  background: linear-gradient(90deg, #231a12 0%, #1b1713 100%);
+  padding: 8px 12px;
+}
+
+.pd3k-revealed-text {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #f3c69f;
+  line-height: 1.35;
+  flex: 1 1 200px;
+}
+
+.pd3k-revealed-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.pd3k-btn-hide {
+  background: #14161a;
+  border: 1px solid #3f2d1d;
+  border-radius: 7px;
+  padding: 4px 9px;
+  color: #f3c69f;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pd3k-btn-hide:hover {
+  background: #231b15;
+  border-color: #5a3f29;
+}
+
+.pd3k-btn-remove {
+  background: transparent;
+  border: 1px solid #2e333d;
+  border-radius: 7px;
+  padding: 4px 8px;
+  color: #9ca3af;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pd3k-btn-remove:hover {
+  color: #e5e7eb;
+  border-color: #4b5563;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pd3k-details-revealed {
+  margin-top: 0;
+  border: 0;
+  border-top: 1px solid #44301f;
+  border-radius: 0;
+  background: #141210;
 }
