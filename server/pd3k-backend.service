@@ -1,0 +1,18 @@
+# systemd unit so the backend survives SSH logout and VPS reboots.
+# Install (adjust paths/user if you cloned elsewhere):
+#   sudo cp pd3k-backend.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now pd3k-backend
+#   journalctl -u pd3k-backend -f
+[Unit]
+Description=PropagandaDestroyer3000 backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/root/pd3k-backend
+ExecStart=/usr/bin/node --env-file-if-exists=.env server.js
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
