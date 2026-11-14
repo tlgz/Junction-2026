@@ -1,4 +1,6 @@
-# Dnoise inference image: FastAPI + the propaganda classifier baked in.
+# Dnoise inference image: FastAPI + the propaganda classifier baked in,
+# plus container-local SQLite storage and an (OFF-by-default) cron job for
+# Kimi K3.1 Pro teacher annotation and BERTweet-large student retraining.
 # Build: docker build -t dnoise-inference inference/
 FROM python:3.12-slim
 
@@ -9,6 +11,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HF_HUB_DISABLE_TELEMETRY=1
 
 WORKDIR /app
+
+# Install cron for the scheduled reteaching pipeline (kept OFF by default).
+RUN apt-get update && apt-get install -y --no-install-recommends cron \
+    && rm -rf /var/lib/apt/lists/*
 
 # CUDA 12.8 wheels run on all current NVIDIA GPUs (incl. Blackwell) and fall back to CPU.
 ARG TORCH_INDEX=https://download.pytorch.org/whl/cu128
@@ -29,14 +35,21 @@ RUN --mount=type=secret,id=hf_token \
 snapshot_download('${MODEL_REPO}', revision='${MODEL_REVISION}', local_dir='/model', \
 token=os.environ.get('HF_TOKEN') or None, allow_patterns=['*.json', '*.safetensors', '*.txt', '*.model'])"
 
-COPY app.py .
+COPY store.py annotate.py retrain.py app.py ./
+COPY crontab /etc/cron.d/dnoise-retrain
+RUN chmod 0644 /etc/cron.d/dnoise-retrain
 
 ENV MODEL_DIR=/model \
+    DATA_DIR=/data \
+    DB_PATH=/data/flagged_posts.db \
     THRESHOLD=0.40 \
+    ENABLE_RETRAIN_CRON=0 \
     PORT=8000
 EXPOSE 8000
 
-RUN useradd --create-home app
+RUN useradd --create-home app \
+    && mkdir -p /data \
+    && chown -R app:app /data /model /app
 USER app
 
 CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT}"]

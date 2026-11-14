@@ -1,19 +1,19 @@
 name: Build inference image
 
-# Builds inference/ into a Docker image (model baked in) and pushes it to GHCR.
-# Deploy the printed sha-* tag on Verda (Containers -> New deployment).
+# Builds inference/ into a Docker image (model baked in).
+# Automatic push on main is disabled so repo changes do not overwrite or update
+# the live Verda serverless container image unless manually triggered with push=true.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "inference/**"
-      - ".github/workflows/inference-image.yml"
   workflow_dispatch:
     inputs:
       model_revision:
         description: "Hugging Face model revision (branch or commit)"
         default: "main"
+      push_image:
+        description: "Push image to GHCR for Verda deployment"
+        type: boolean
+        default: false
 
 env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/dnoise-inference
@@ -37,6 +37,7 @@ jobs:
       - uses: docker/setup-buildx-action@v3
 
       - uses: docker/login-action@v3
+        if: ${{ inputs.push_image == true }}
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -51,7 +52,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: inference
-          push: true
+          push: ${{ inputs.push_image == true }}
           platforms: linux/amd64
           build-args: |
             MODEL_REVISION=${{ inputs.model_revision || 'main' }}
@@ -63,5 +64,9 @@ jobs:
 
       - name: Summary
         run: |
-          echo "### Pushed \`${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "Use this exact tag in the Verda deployment (not \`latest\`)." >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ inputs.push_image }}" = "true" ]; then
+            echo "### Pushed \`${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "Use this exact tag in the Verda deployment (not \`latest\`)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Built \`${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}\` (not pushed)" >> "$GITHUB_STEP_SUMMARY"
+          fi

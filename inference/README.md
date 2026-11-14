@@ -40,10 +40,14 @@ The model weights are **baked into the image** at build time, so a cold start do
 
 | File | Purpose |
 |---|---|
-| `app.py` | FastAPI server: `/health`, `/api/classify`, `/predict` |
-| `Dockerfile` | Python 3.12 + CUDA 12.8 PyTorch + model weights |
+| `app.py` | FastAPI server: `/health`, `/api/classify`, `/predict`, `/reload` |
+| `store.py` | SQLite store (`/data/flagged_posts.db`) for flagged and near-threshold posts |
+| `annotate.py` | Batch teacher annotation (batches of 20) via Kimi K3.1 Pro on Verda Inference |
+| `retrain.py` | Student distillation retraining (`vinai/bertweet-large`, 70/30 soft targets) + weight swap |
+| `crontab` | Cron job definition (`/etc/cron.d/dnoise-retrain`), installed in the image and **OFF** by default |
+| `Dockerfile` | Python 3.12 + CUDA 12.8 PyTorch + model weights + cron |
 | `requirements.txt` | Python deps (torch is installed in the Dockerfile) |
-| [`../.github/workflows/inference-image.yml`](../.github/workflows/inference-image.yml) | Builds and pushes the image to GHCR |
+| [`../.github/workflows/inference-image.yml`](../.github/workflows/inference-image.yml) | Manual workflow to build (and optionally push) the image to GHCR |
 
 ### API
 

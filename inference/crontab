@@ -1,0 +1,15 @@
+# Dnoise live-traffic annotation (Kimi K3.1 Pro via Verda Inference) and
+# BERTweet-large student distillation retraining cron job.
+#
+# STATUS: OFF by default.
+# To enable inside the container, uncomment the schedule line below and set
+# ENABLE_RETRAIN_CRON=1 so the container starts the cron daemon alongside uvicorn.
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Runs daily at 03:00 UTC when enabled:
+# 1) Annotates saved flagged/near-threshold X posts in batches of 20 with Kimi K3.1 Pro
+# 2) Fine-tunes the 0.4B BERTweet-large student on 70/30 HQP + new Kimi soft targets
+# 3) Swaps weights in /model and reloads the inference server
+# 0 3 * * * app cd /app && python /app/retrain.py >> /data/retrain.log 2>&1
