@@ -110,6 +110,32 @@ if (isDev) {
   }
 }
 
+const LOGO_EXTS = new Set(['.svg', '.png', '.jpg', '.jpeg', '.webp', '.gif']);
+
+function formatLogoName(filename) {
+  return filename
+    .replace(/\.[^.]+$/, '')
+    .replace(/^\d+[-_.\s]+/, '')
+    .replace(/[-_]+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+app.get('/api/logos', (_req, res) => {
+  const logosDir = path.join(publicDir, 'assets', 'logos');
+  if (!fs.existsSync(logosDir)) return res.json([]);
+  const files = fs
+    .readdirSync(logosDir)
+    .filter((f) => LOGO_EXTS.has(path.extname(f).toLowerCase()))
+    .sort((a, b) => a.localeCompare(b));
+  res.json(
+    files.map((file) => ({
+      name: formatLogoName(file),
+      src: `/assets/logos/${encodeURIComponent(file)}`,
+    })),
+  );
+});
+
 app.get('/health', (_req, res) => res.json({ ok: true, model: MODEL }));
 app.get('/', (_req, res) => {
   const file = path.join(publicDir, 'index.html');
