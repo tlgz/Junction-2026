@@ -216,36 +216,8 @@
   line-height: 1.45;
 }
 
-.pd3k-prediction-group {
-  margin-bottom: 8px;
-}
-
-.pd3k-prediction-group:last-child {
-  margin-bottom: 0;
-}
-
-.pd3k-prediction-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--pd3k-red);
-  margin-bottom: 4px;
-}
-
-.pd3k-prediction-category {
-  font-weight: 700;
-}
-
-.pd3k-prediction-score {
-  font-size: 11px;
-  color: var(--pd3k-muted);
-  font-weight: 500;
-}
-
 .pd3k-reasons-list {
-  margin: 4px 0 0 0;
+  margin: 0;
   padding-left: 18px;
   list-style-type: disc;
 }
@@ -266,7 +238,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  margin: 0;
   font-size: 12px;
   color: var(--pd3k-muted);
   line-height: 1.45;

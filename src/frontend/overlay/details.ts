@@ -16,15 +16,6 @@ function primaryPrediction(verdict: Verdict): Prediction | undefined {
   return verdict.predictions.find((p) => p.category === verdict.labels[0]) ?? verdict.predictions[0];
 }
 
-function renderTitle(pred: Prediction): HTMLElement {
-  return el(
-    "div",
-    "pd3k-prediction-title",
-    el("span", "pd3k-prediction-category", pred.category),
-    el("span", "pd3k-prediction-score", `(${Math.round(pred.confidence * 100)}% confidence)`),
-  );
-}
-
 function renderReasons(reasons: string[]): HTMLElement {
   if (reasons.length === 0) return el("p", "pd3k-details-text", EMPTY_TEXT);
   return el("ul", "pd3k-reasons-list", ...reasons.map((r) => el("li", "pd3k-reason-item", r)));
@@ -62,7 +53,7 @@ export function createInfoSection(verdict: Verdict, loadReasons?: ReasonsLoader)
 
   const pred = primaryPrediction(verdict);
   const body = el("div", "pd3k-details-body");
-  const details = el("div", "pd3k-details", ...(pred ? [renderTitle(pred)] : []), body);
+  const details = el("div", "pd3k-details", body);
   details.hidden = true;
 
   // Reasons already present (e.g. mock mode) are shown as-is, without a request.
