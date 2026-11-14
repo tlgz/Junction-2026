@@ -459,30 +459,38 @@
         const logos = await res.json();
         if (!Array.isArray(logos) || logos.length === 0) return;
 
-        const buildSet = () => {
-          const frag = document.createDocumentFragment();
-          logos.forEach((logo) => {
-            const item = document.createElement('div');
-            item.className = 'logo-item';
+        // Repeat the list enough times within one half so a single half is always
+        // wider than the marquee viewport, preventing any gap before the -50% loop reset.
+        const repeatsPerHalf = Math.max(3, Math.ceil(16 / logos.length));
 
-            const img = document.createElement('img');
-            img.className = 'logo-img';
-            img.src = logo.src;
-            img.alt = '';
-            img.loading = 'lazy';
+        const buildHalf = (ariaHidden) => {
+          const half = document.createElement('div');
+          half.className = 'logo-half';
+          if (ariaHidden) half.setAttribute('aria-hidden', 'true');
 
-            const label = document.createElement('span');
-            label.className = 'logo-name';
-            label.textContent = logo.name;
+          for (let i = 0; i < repeatsPerHalf; i++) {
+            logos.forEach((logo) => {
+              const item = document.createElement('div');
+              item.className = 'logo-item';
 
-            item.append(img, label);
-            frag.appendChild(item);
-          });
-          return frag;
+              const img = document.createElement('img');
+              img.className = 'logo-img';
+              img.src = logo.src;
+              img.alt = '';
+
+              const label = document.createElement('span');
+              label.className = 'logo-name';
+              label.textContent = logo.name;
+
+              item.append(img, label);
+              half.appendChild(item);
+            });
+          }
+          return half;
         };
 
-        // Render two identical sets so translateX(-50%) loops seamlessly
-        logoTrack.append(buildSet(), buildSet());
+        // Render two identical halves so translateX(-50%) loops seamlessly
+        logoTrack.replaceChildren(buildHalf(false), buildHalf(true));
       } catch {
         // Ignore if logo list fails to load
       }

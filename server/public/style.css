@@ -486,16 +486,23 @@ body {
   display: flex;
   align-items: center;
   width: max-content;
-  animation: logoScroll 26s linear infinite;
+  will-change: transform;
+  animation: logoScroll 48s linear infinite;
+}
+
+.logo-half {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 @keyframes logoScroll {
   from {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 
   to {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
