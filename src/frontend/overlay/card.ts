@@ -1,0 +1,45 @@
+// Renders the Dnoise interception card shown above a shielded propaganda post.
+
+import type { Verdict } from "../../shared/types";
+import { el, swallow } from "../dom";
+import { createInfoSection } from "./details";
+
+const SUMMARY_TEXT =
+  "This post shows strong indicators of coordinated propaganda or manipulative framing.";
+
+export interface CardOptions {
+  likelihood: number;
+  verdict: Verdict;
+}
+
+export function createInterceptionCard({
+  likelihood,
+  verdict,
+}: CardOptions): HTMLElement {
+  const pill = el(
+    "span",
+    "pd3k-likelihood-pill",
+    `${likelihood}% Propaganda Likelihood`,
+  );
+  const brand = el("span", "pd3k-brand-label", "DNOISE INTERCEPTION");
+  const metaRow = el("div", "pd3k-meta-row", pill, brand);
+  const summary = el("p", "pd3k-summary", SUMMARY_TEXT);
+  const info = createInfoSection(verdict);
+
+  info.btn.addEventListener("click", (e) => {
+    swallow(e);
+    info.toggle();
+  });
+
+  const card = el(
+    "div",
+    "pd3k-card",
+    metaRow,
+    summary,
+    info.details,
+    el("div", "pd3k-actions", info.btn),
+  );
+  card.addEventListener("click", swallow);
+
+  return card;
+}

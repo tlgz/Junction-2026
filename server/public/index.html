@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dnoise — Filter manipulation from your feed</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header class="topbar">
+    <span class="brand">DNOISE</span>
+  </header>
+
+  <main class="hero">
+    <section class="hero-copy">
+      <h1>Keep coordinated manipulation out of your feed</h1>
+      <p class="subtitle">
+        Dnoise detects propaganda, rage-bait, and manipulative framing on X in real time and shields it before it grabs your attention.
+      </p>
+      <div class="cta-row">
+        <a href="#download" class="btn btn-primary">Download extension &rarr;</a>
+        <a href="#info" class="btn btn-secondary">See more info</a>
+      </div>
+    </section>
+
+    <section class="hero-preview" aria-label="Example intercepted post">
+      <div class="preview-shell">
+        <div class="dnoise-card">
+          <div class="dnoise-meta">
+            <span class="dnoise-pill">84% Propaganda Likelihood</span>
+            <span class="dnoise-tag">DNOISE INTERCEPTION</span>
+          </div>
+          <p class="dnoise-summary">
+            This post shows strong indicators of coordinated propaganda or manipulative framing.
+          </p>
+          <div class="dnoise-actions">
+            <button type="button" class="dnoise-info-btn" id="preview-info-btn" aria-expanded="false">
+              <span>See why &amp; more info</span>
+              <svg class="dnoise-chevron" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 7.5 10 12.5 15 7.5" />
+              </svg>
+            </button>
+          </div>
+          <div class="dnoise-details" id="preview-details" hidden>
+            <p class="dnoise-details-text">
+              Flagged for emotionally charged framing, unverified sweeping claims, and narrative patterns associated with coordinated amplification.
+            </p>
+          </div>
+        </div>
+
+        <div class="dnoise-blur-box">
+          <div class="dnoise-blur-shapes" aria-hidden="true">
+            <div class="blur-bar blur-bar-lg"></div>
+            <div class="blur-bar blur-bar-md"></div>
+            <div class="blur-bar blur-bar-sm"></div>
+          </div>
+          <div class="dnoise-reveal-scrim">
+            <span class="dnoise-reveal-btn">Reveal post anyway</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const infoBtn = document.getElementById('preview-info-btn');
+    const details = document.getElementById('preview-details');
+    if (infoBtn && details) {
+      infoBtn.addEventListener('click', () => {
+        const isOpen = !details.hidden;
+        details.hidden = isOpen;
+        infoBtn.setAttribute('aria-expanded', String(!isOpen));
+        infoBtn.classList.toggle('is-open', !isOpen);
+      });
+    }
+  </script>
+</body>
+
+</html>

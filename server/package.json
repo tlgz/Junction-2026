@@ -1,0 +1,17 @@
+{
+  "name": "pd3k-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dnoise classification backend (Hostinger VPS -> Hostinger AI Router).",
+  "type": "module",
+  "engines": { "node": ">=20.12" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js --dev"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "openai": "^4.77.0"
+  }
+}
